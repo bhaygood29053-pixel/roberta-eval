@@ -73,3 +73,6 @@ jobs:
 
       - name: Evaluation dashboard
         run: roberta-eval dashboard --json /tmp/roberta-dashboard.json --markdown /tmp/roberta-dashboard.md
+
+      - name: GitHub defect proposal smoke
+        run: roberta-eval defect-proposals --clusters /tmp/roberta-clusters.jsonl --output /tmp/roberta-defect-proposals.jsonl

@@ -14,6 +14,7 @@ from .clustering import cluster_findings, cluster_summary, load_jsonl as load_cl
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .dashboard import build_dashboard, write_dashboard_json, write_dashboard_markdown
 from .generator import generate_cases, generated_summary, write_generated
+from .github_promotion import build_issue_proposals, load_jsonl as load_proposal_jsonl, proposal_summary, write_proposals
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
 from .regression_memory import load_memory, memory_summary, validate_memory
@@ -217,6 +218,18 @@ def dashboard_suite(json_output: str | None, markdown_output: str | None) -> int
     return 0
 
 
+def proposal_suite(clusters_path: str, confirmed: list[str], output: str | None) -> int:
+    clusters = load_proposal_jsonl(Path(clusters_path))
+    proposals = build_issue_proposals(
+        clusters,
+        confirmed_cluster_ids=set(confirmed),
+    )
+    if output:
+        write_proposals(Path(output), proposals)
+    print(json.dumps(proposal_summary(proposals), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -263,6 +276,10 @@ def main() -> int:
     dashboard_parser = subparsers.add_parser("dashboard", help="render current Laboratory dashboard")
     dashboard_parser.add_argument("--json", dest="json_output", default=None)
     dashboard_parser.add_argument("--markdown", dest="markdown_output", default=None)
+    proposal_parser = subparsers.add_parser("defect-proposals", help="build reviewable GitHub issue proposals")
+    proposal_parser.add_argument("--clusters", required=True)
+    proposal_parser.add_argument("--confirm", action="append", default=[])
+    proposal_parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -299,6 +316,8 @@ def main() -> int:
         return trend_suite()
     if args.command == "dashboard":
         return dashboard_suite(args.json_output, args.markdown_output)
+    if args.command == "defect-proposals":
+        return proposal_suite(args.clusters, args.confirm, args.output)
 
     return 2
 

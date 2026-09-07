@@ -44,6 +44,7 @@ src/roberta_eval/
   regression_memory.py confirmed replayable defect memory
   trends.py       normalized longitudinal quality comparisons
   dashboard.py    presentation-only evaluation view model and Markdown
+  github_promotion.py review-gated GitHub defect proposals
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -137,3 +138,7 @@ Deterministic correctness trends and advisory human-quality trends are separate.
 ## Dashboard boundary
 
 The dashboard is presentation-only. It must preserve source qualification scope and cannot recompute evidence, overrule deterministic graders, or represent fixture results as live ROBERTA proof.
+
+## GitHub defect-promotion boundary
+
+The Laboratory produces reviewable issue proposals only from explicitly confirmed actionable clusters. Proposal generation does not create an issue automatically, and UNKNOWN localization remains unassigned until evidence improves.
