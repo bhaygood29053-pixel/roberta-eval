@@ -74,8 +74,6 @@ The deterministic corpus uses synthetic fixtures; HTTP execution support does no
 
 Acceptance completed in merged LAB #5.
 
-## Active
-
 ### LAB #6 — Deterministic graders
 
 Grade facts, numbers, freshness, evidence fidelity, risk semantics, execution boundaries, and runtime failures without inventing missing structure.
@@ -90,13 +88,26 @@ Current LAB #6 implementation:
 - per-case check results plus suite verdict counts;
 - CLI/CI grading smoke coverage.
 
-Acceptance is complete when the LAB #6 PR is green and merged.
+Acceptance completed in merged LAB #6.
 
-## Next
+## Active
 
 ### LAB #7 — Generated variation
 
-Generate paraphrases and scenario variations without changing the underlying test objective.
+Generate thousands of reproducible surface variations without changing the underlying test objective or answer key.
+
+Current LAB #7 implementation:
+- 60 deterministic surface forms per reviewed blueprint;
+- 3,240 generated cases from 54 blueprints;
+- all 18 services retained;
+- objective signature, fixture, evidence condition, and checks preserved exactly within each blueprint family;
+- duplicate IDs/text rejected;
+- stable generated-suite SHA-256;
+- CLI/CI materialization and validation.
+
+Acceptance is complete when the LAB #7 PR is green and merged.
+
+## Next
 
 ### LAB #8 — 2,500-question stress run
 
