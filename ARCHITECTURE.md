@@ -37,6 +37,7 @@ src/roberta_eval/
   stress.py       large-suite qualification and reporting
   quality.py      advisory human-response quality scoring
   adversarial.py  invariant-targeted adversarial suite generation
+  conversation.py multi-turn generation, execution, and fact-consistency grading
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -44,6 +45,7 @@ config/
   corpus_blueprints.json  reviewed known-answer case blueprints and style variants
   generation_surfaces.json deterministic high-volume wording surfaces
   adversarial_attacks.json named invariant-attack wrappers
+  conversation_patterns.json multi-turn no-new-evidence patterns
 
 future/
   generators/     question/scenario generation
@@ -99,3 +101,7 @@ The default 2,500-case stress gate qualifies Laboratory pipeline scale using fix
 ## Advisory semantic/human-quality boundary
 
 Human-quality scores are secondary signals. They may identify poor clarity, weak uncertainty language, repetitive output, missing recommendations, or internal-contract leakage, but they cannot change deterministic facts, erase deterministic failures, or serve as factual authority. Future semantic judges must implement the same advisory boundary.
+
+## Multi-turn runtime boundary
+
+The current public HTTP adapter posts individual messages and does not expose an explicit session/conversation identifier. Therefore fixture multi-turn consistency is qualified, but live HTTP context retention remains unqualified until ROBERTA exposes and documents a session contract.

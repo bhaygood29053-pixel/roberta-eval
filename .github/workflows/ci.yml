@@ -52,3 +52,6 @@ jobs:
 
       - name: Adversarial suite
         run: roberta-eval adversarial --write /tmp/roberta-adversarial-suite.jsonl
+
+      - name: Multi-turn consistency suite
+        run: roberta-eval conversations --write /tmp/roberta-conversations.json
