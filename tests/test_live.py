@@ -41,7 +41,7 @@ def test_balanced_selection_spans_services() -> None:
     selected = select_cases(cases, limit=20, strategy="balanced")
 
     assert len(selected) == 20
-    assert len({case["service"] for case in selected}) >= 10
+    assert len({case["service"] for case in selected}) == 18
 
 
 def test_live_grader_requires_structured_telemetry() -> None:
