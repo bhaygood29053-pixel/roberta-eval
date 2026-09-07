@@ -57,8 +57,6 @@ Current LAB #4 implementation:
 
 Acceptance completed in merged LAB #4.
 
-## Active
-
 ### LAB #5 — Runtime harness
 
 Run cases through a normalized ROBERTA transport and persist machine-readable test-run records.
@@ -74,13 +72,27 @@ Current LAB #5 implementation:
 
 The deterministic corpus uses synthetic fixtures; HTTP execution support does not by itself claim those synthetic cases are valid live-chain truth.
 
-Acceptance is complete when the LAB #5 PR is green and merged.
+Acceptance completed in merged LAB #5.
 
-## Next
+## Active
 
 ### LAB #6 — Deterministic graders
 
-Grade facts, numbers, freshness, evidence fidelity, risk semantics, and execution boundaries.
+Grade facts, numbers, freshness, evidence fidelity, risk semantics, execution boundaries, and runtime failures without inventing missing structure.
+
+Current LAB #6 implementation:
+- field equality/null/greater-than/less-than checks with numeric-tolerance support;
+- freshness and numeric fixture grading through structured evidence;
+- canonical forbidden-conclusion checks;
+- CRITICAL execution-boundary failures;
+- runtime-failure grading;
+- text-only/insufficiently structured responses become WARN rather than guessed PASS/FAIL;
+- per-case check results plus suite verdict counts;
+- CLI/CI grading smoke coverage.
+
+Acceptance is complete when the LAB #6 PR is green and merged.
+
+## Next
 
 ### LAB #7 — Generated variation
 
