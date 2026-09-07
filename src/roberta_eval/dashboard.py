@@ -76,7 +76,7 @@ def render_markdown(view: dict[str, Any]) -> str:
 **Dashboard:** {view['dashboard_version']}
 **Qualification scope:** {q['scope']}
 **Accepted:** {'YES' if q['accepted'] else 'NO'}
-**Live ROBERTA qualified:** {str(q['live_roberta_qualified']).lower()}
+Live ROBERTA qualified: {str(q['live_roberta_qualified']).lower()}
 
 ## Deterministic quality
 
