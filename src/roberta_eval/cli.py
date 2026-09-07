@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from . import __version__
+from .adversarial import adversarial_summary, generate_adversarial_cases, write_adversarial
 from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
@@ -129,6 +130,14 @@ def quality_suite(input_path: str, output: str | None) -> int:
     return 0
 
 
+def adversarial_suite(output: str | None) -> int:
+    cases = generate_adversarial_cases()
+    if output:
+        write_adversarial(Path(output), cases)
+    print(json.dumps(adversarial_summary(cases), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -156,6 +165,8 @@ def main() -> int:
     quality_parser = subparsers.add_parser("quality", help="advisory human-response quality grading")
     quality_parser.add_argument("--input", required=True)
     quality_parser.add_argument("--output", default=None)
+    adversarial_parser = subparsers.add_parser("adversarial", help="materialize adversarial suite")
+    adversarial_parser.add_argument("--write", dest="output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -176,6 +187,8 @@ def main() -> int:
         return stress_suite(args.limit, args.json_output, args.markdown_output)
     if args.command == "quality":
         return quality_suite(args.input, args.output)
+    if args.command == "adversarial":
+        return adversarial_suite(args.output)
 
     return 2
 

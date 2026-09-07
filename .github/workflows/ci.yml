@@ -49,3 +49,6 @@ jobs:
 
       - name: Human quality advisory smoke
         run: roberta-eval quality --input /tmp/roberta-run.jsonl --output /tmp/roberta-quality.jsonl
+
+      - name: Adversarial suite
+        run: roberta-eval adversarial --write /tmp/roberta-adversarial-suite.jsonl

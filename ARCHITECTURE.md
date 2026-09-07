@@ -36,12 +36,14 @@ src/roberta_eval/
   generator.py    reproducible high-volume surface variation
   stress.py       large-suite qualification and reporting
   quality.py      advisory human-response quality scoring
+  adversarial.py  invariant-targeted adversarial suite generation
 
 config/
   capabilities.json       ROBERTA capability inventory
   question_taxonomy.json  test-class and generation dimensions
   corpus_blueprints.json  reviewed known-answer case blueprints and style variants
   generation_surfaces.json deterministic high-volume wording surfaces
+  adversarial_attacks.json named invariant-attack wrappers
 
 future/
   generators/     question/scenario generation
