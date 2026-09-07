@@ -105,8 +105,6 @@ Current LAB #7 implementation:
 
 Acceptance completed in merged LAB #7.
 
-## Active
-
 ### LAB #8 — 2,500-question stress run
 
 Run the first 2,500-case end-to-end Laboratory pipeline qualification and report coverage/verdicts.
@@ -120,22 +118,56 @@ Current LAB #8 implementation:
 - explicit boundary: this qualifies Laboratory pipeline scale, not live ROBERTA answer quality;
 - CI executes the full qualification.
 
-Acceptance target: 2,500 PASS / 0 WARN / 0 FAIL on the fixture baseline, with all acceptance checks green.
+Acceptance completed in merged LAB #8 with the fixture pipeline gate green.
 
-## Next-generation work
+## Active
 
-- semantic and human-quality graders;
-- adversarial suites;
-- multi-turn consistency testing;
-- failure classification and severity;
-- root-cause localization;
-- failure clustering;
-- permanent regression memory;
-- trend intelligence;
-- evaluation dashboard;
-- GitHub defect promotion;
-- release qualification gates;
-- 10,000+ and eventually 25,000+ case suites.
+### LAB #9 — Human & Semantic Quality Grading v1
+
+Add advisory scoring for human-facing response quality without granting subjective graders factual authority.
+
+Current LAB #9 implementation:
+- answer-presence, clarity, relevance, uncertainty, recommendation, repetition, and internal-contract-hygiene signals;
+- semantic-judge protocol for future independent providers;
+- explicit `advisory_only=true` and `factual_authority=false`;
+- CLI/CI support over normalized run records.
+
+Acceptance is complete when the LAB #9 PR is green and merged.
+
+## Next
+
+### LAB #10 — Adversarial Suite v1
+Add systematic invariant attacks and false-premise pressure cases.
+
+### LAB #11 — Multi-turn Consistency v1
+Test context retention, contradiction, correction, and evidence evolution across conversations.
+
+### LAB #12 — Failure Classification v1
+Map grader/runtime findings into stable defect categories and severities.
+
+### LAB #13 — Root Cause Localization v1
+Use available layer snapshots to identify the most likely failing component without guessing when snapshots are absent.
+
+### LAB #14 — Failure Clustering v1
+Collapse recurring failures into actionable defect clusters.
+
+### LAB #15 — Regression Memory v1
+Persist confirmed defects as permanent replayable regression cases.
+
+### LAB #16 — Trend Intelligence v1
+Compare evaluation runs/releases and quantify improvement/regression.
+
+### LAB #17 — Evaluation Dashboard v1
+Render compact human-readable quality and trend dashboards.
+
+### LAB #18 — GitHub Defect Promotion v1
+Generate reviewable GitHub issue proposals from accepted failure clusters.
+
+### LAB #19 — Release Qualification v1
+Define evidence-aware release gates that combine deterministic and advisory metrics appropriately.
+
+### LAB #20 — 10k/25k Scale Suites
+Scale generated/adversarial/conversation suites while preserving objective quality.
 
 ## Quality rule
 
