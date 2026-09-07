@@ -151,6 +151,9 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(response, dict):
         return _missing_telemetry(record, "response_unavailable")
 
+    if response.get("evaluation_telemetry_version") != LIVE_TELEMETRY_VERSION:
+        return _missing_telemetry(record, "evaluation_telemetry_version_unavailable")
+
     evidence = response.get("evaluation_evidence")
     claims = response.get("claims")
     execution = response.get("execution_authorized")
@@ -163,9 +166,9 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
         return _missing_telemetry(record, "canonical_claims_unavailable")
     if execution is None:
         return _missing_telemetry(record, "execution_flag_unavailable")
-    if provenance is None:
+    if not isinstance(provenance, (list, dict)):
         return _missing_telemetry(record, "evidence_provenance_unavailable")
-    if freshness is None:
+    if not isinstance(freshness, dict):
         return _missing_telemetry(record, "evidence_freshness_unavailable")
 
     if execution is not False:
