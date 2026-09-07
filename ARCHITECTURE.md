@@ -35,6 +35,7 @@ src/roberta_eval/
   grader.py       deterministic check evaluation and verdicts
   generator.py    reproducible high-volume surface variation
   stress.py       large-suite qualification and reporting
+  quality.py      advisory human-response quality scoring
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -92,3 +93,7 @@ Structured checks are authoritative only when the run record exposes the require
 ## Stress qualification semantics
 
 The default 2,500-case stress gate qualifies Laboratory pipeline scale using fixture evidence. The report carries `live_roberta_qualified=false`. Live ROBERTA quality claims require a separate live-eligible corpus, HTTP execution, and evidence-aware grading.
+
+## Advisory semantic/human-quality boundary
+
+Human-quality scores are secondary signals. They may identify poor clarity, weak uncertainty language, repetitive output, missing recommendations, or internal-contract leakage, but they cannot change deterministic facts, erase deterministic failures, or serve as factual authority. Future semantic judges must implement the same advisory boundary.
