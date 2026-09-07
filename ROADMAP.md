@@ -309,7 +309,11 @@ Current LAB #21 implementation:
 - bounded evidence-contract qualification kept separate from provider-truth/full-natural-language certification;
 - deterministic CI validates the live plan and Laboratory logic without provider keys.
 
-Acceptance completes when the LAB #21 PR is green and merged; live ROBERTA qualification additionally depends on ROBERTA exposing the read-only telemetry contract.
+Acceptance completed via LAB #21 PR #43 / merge `bd42df06d7fa80034a38e875fed96328774460f0`.
+
+The required ROBERTA read-only telemetry dependency is also accepted through public ROBERTA PR #399 / merge `109f91f289c3fd6a2542b1eebca93091d5c0a225` and protected `roberta-core` PR #85 / merge `13a870195f038865d023280fd3d1277bc9736397`.
+
+LAB #21 is therefore ready for bounded local live runs after the local ROBERTA/Laboratory runtimes are synchronized. Full provider-truth or all-natural-language answer certification remains explicitly unclaimed.
 
 ## Quality rule
 
