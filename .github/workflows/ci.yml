@@ -70,3 +70,6 @@ jobs:
 
       - name: Trend intelligence
         run: roberta-eval trends
+
+      - name: Evaluation dashboard
+        run: roberta-eval dashboard --json /tmp/roberta-dashboard.json --markdown /tmp/roberta-dashboard.md
