@@ -31,10 +31,14 @@ def roberta_endpoint(target: str) -> str:
 class HttpRobertaTransport:
     target: str
     timeout_seconds: float = 120.0
+    evaluation_mode: str | None = None
     name: str = "http"
 
     def send(self, question: str, *, case: dict[str, Any]) -> dict[str, Any]:
-        payload = json.dumps({"message": question}).encode("utf-8")
+        request_payload: dict[str, Any] = {"message": question}
+        if self.evaluation_mode is not None:
+            request_payload["evaluation_mode"] = self.evaluation_mode
+        payload = json.dumps(request_payload).encode("utf-8")
         req = urlrequest.Request(
             roberta_endpoint(self.target),
             data=payload,
