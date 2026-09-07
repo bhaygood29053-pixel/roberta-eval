@@ -1,0 +1,10 @@
+[lab]
+name = "ROBERTA Evaluation Laboratory"
+contract_version = "v1"
+default_target = "http://127.0.0.1:8766"
+production_mutation_allowed = false
+
+[evaluation]
+prefer_deterministic_ground_truth = true
+preserve_confirmed_regressions = true
+allow_ai_judge_as_deterministic_authority = false
