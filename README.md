@@ -58,6 +58,19 @@ roberta-eval live-grade \
   --output /tmp/roberta-live-grades.jsonl
 ```
 
+Turn those grades into the LAB #22 remediation map:
+
+```bash
+roberta-eval live-diagnose \
+  --input /tmp/roberta-live-grades.jsonl \
+  --json /tmp/roberta-live-diagnostics.json \
+  --markdown /tmp/roberta-live-diagnostics.md
+```
+
+LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
+prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
+Integrity, claim/evidence, and execution-boundary remediation deterministically.
+
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
 A LAB #21 `PASS` is deliberately bounded: it proves the selected canonical structured claims match the captured accepted evidence and the final response carries `roberta_claim_integrity/v1` PASS. It does **not** certify upstream provider truth or every natural-language sentence, so `live_roberta_qualified` remains false in v1.
