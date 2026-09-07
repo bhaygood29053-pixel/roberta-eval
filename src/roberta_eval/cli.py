@@ -8,6 +8,7 @@ from . import __version__
 from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
 from .registry import load_registry, registry_summary, validate_registry
+from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .taxonomy import load_taxonomy, taxonomy_summary, validate_taxonomy
 
 
@@ -57,6 +58,28 @@ def corpus(output: str | None = None) -> int:
     return 0
 
 
+def run_suite(mode: str, limit: int | None, output: str | None, target: str | None, run_id: str) -> int:
+    config = load_config()
+    selected_target = target or config["lab"]["default_target"]
+    if mode == "http":
+        transport = HttpRobertaTransport(selected_target)
+    else:
+        transport = FixtureRobertaTransport()
+        selected_target = "fixture://local"
+
+    records = run_cases(
+        materialize_cases(),
+        transport=transport,
+        run_id=run_id,
+        target=selected_target,
+        limit=limit,
+    )
+    if output:
+        write_run(Path(output), records)
+    print(json.dumps(run_summary(records), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -65,6 +88,12 @@ def main() -> int:
     subparsers.add_parser("taxonomy", help="validate and summarize the question taxonomy")
     corpus_parser = subparsers.add_parser("corpus", help="validate and summarize deterministic corpus")
     corpus_parser.add_argument("--write", dest="output", help="write materialized JSONL corpus")
+    run_parser = subparsers.add_parser("run", help="execute corpus cases through a ROBERTA transport")
+    run_parser.add_argument("--mode", choices=("fixture", "http"), default="fixture")
+    run_parser.add_argument("--limit", type=int, default=None)
+    run_parser.add_argument("--output", default=None)
+    run_parser.add_argument("--target", default=None)
+    run_parser.add_argument("--run-id", default="manual-run")
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -75,6 +104,8 @@ def main() -> int:
         return taxonomy()
     if args.command == "corpus":
         return corpus(args.output)
+    if args.command == "run":
+        return run_suite(args.mode, args.limit, args.output, args.target, args.run_id)
 
     return 2
 
