@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -70,8 +71,8 @@ def generate_conversations(
                     "objective_signature": blueprint["objective_signature"],
                     "blueprint_id": blueprint["id"],
                     "user_style": "direct",
-                    "fixture": blueprint["fixture"],
-                    "checks": blueprint["checks"],
+                    "fixture": deepcopy(blueprint["fixture"]),
+                    "checks": deepcopy(blueprint["checks"]),
                 }
             )
         conversations.append(
