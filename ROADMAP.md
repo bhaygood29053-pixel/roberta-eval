@@ -14,8 +14,6 @@ Acceptance:
 - CI exists;
 - Laboratory contract, architecture, and roadmap exist.
 
-## Completed
-
 ### LAB #2 — Capability Registry v1
 
 Create the authoritative inventory of ROBERTA services/capabilities, required evidence, supported question families, freshness rules, allowed conclusions, and known limitations.
