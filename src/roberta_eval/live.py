@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Any
 
 from .config import repository_root
+from .registry import load_registry
+from .taxonomy import load_taxonomy
 
 
 LIVE_CASE_VERSION = "roberta_live_eval_case/v1"
@@ -47,6 +49,9 @@ def validate_live_suite(config: dict[str, Any]) -> None:
         if not isinstance(subject.get("value"), str) or not subject["value"]:
             raise ValueError("live subject requires value")
 
+    registry_services = {item["id"] for item in load_registry()["cmis_services"]}
+    taxonomy_classes = {item["id"] for item in load_taxonomy()["classes"]}
+
     family_ids: set[str] = set()
     for family in families:
         family_id = family.get("id")
@@ -57,8 +62,12 @@ def validate_live_suite(config: dict[str, Any]) -> None:
         family_ids.add(family_id)
         if not isinstance(family.get("service"), str) or not family["service"]:
             raise ValueError("live question family requires service")
+        if family["service"] not in registry_services:
+            raise ValueError(f"unknown live service: {family['service']}")
         if not isinstance(family.get("taxonomy_class"), str) or not family["taxonomy_class"]:
             raise ValueError("live question family requires taxonomy_class")
+        if family["taxonomy_class"] not in taxonomy_classes:
+            raise ValueError(f"unknown live taxonomy class: {family['taxonomy_class']}")
         template = family.get("template")
         if not isinstance(template, str) or "{label}" not in template:
             raise ValueError("live question template must include {label}")
