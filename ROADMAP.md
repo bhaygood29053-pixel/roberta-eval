@@ -28,8 +28,6 @@ Current LAB #2 implementation:
 
 Acceptance completed in merged LAB #2.
 
-## Active
-
 ### LAB #3 — Question Taxonomy v1
 
 Define machine-readable question classes and separate evidence, user-style, and conversation-shape dimensions.
@@ -41,13 +39,27 @@ Current LAB #3 implementation:
 - strict capability-reference and conversation-shape validation;
 - CLI and CI taxonomy validation.
 
-Acceptance is complete when the LAB #3 PR is green and merged.
+Acceptance completed in merged LAB #3.
 
-## Next
+## Active
 
 ### LAB #4 — First deterministic corpus
 
 Create the first 100 known-answer cases, then expand to 500.
+
+Current LAB #4 implementation:
+- 54 deterministic service blueprints across all 18 CMIS services;
+- 10 objective-preserving wording/style variants per blueprint;
+- 540 reproducible known-answer cases;
+- machine-readable fixture data and deterministic checks;
+- execution-unauthorized check on every case;
+- stable case IDs, objective signatures, and corpus SHA-256;
+- CLI can materialize byte-stable JSONL;
+- CI validates coverage and reproducibility.
+
+Acceptance is complete when the LAB #4 PR is green and merged.
+
+## Next
 
 ### LAB #5 — Runtime harness
 

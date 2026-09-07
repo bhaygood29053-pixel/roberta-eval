@@ -30,10 +30,12 @@ src/roberta_eval/
   cli.py          operator entry point
   registry.py     capability registry validation
   taxonomy.py     question taxonomy validation
+  corpus.py       deterministic corpus materialization and validation
 
 config/
   capabilities.json       ROBERTA capability inventory
   question_taxonomy.json  test-class and generation dimensions
+  corpus_blueprints.json  reviewed known-answer case blueprints and style variants
 
 future/
   generators/     question/scenario generation
