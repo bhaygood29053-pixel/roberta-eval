@@ -32,6 +32,7 @@ src/roberta_eval/
   taxonomy.py     question taxonomy validation
   corpus.py       deterministic corpus materialization and validation
   runner.py       fixture/HTTP transports and normalized run records
+  grader.py       deterministic check evaluation and verdicts
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -80,3 +81,7 @@ Every executed case should eventually produce a durable record containing at lea
 ## Runtime harness boundary
 
 The deterministic corpus is fixture-backed and may be executed through the fixture transport in CI. The HTTP transport is a real ROBERTA bridge adapter, but running a synthetic fixture question against a live chain does not convert the synthetic answer key into live truth. Live semantic qualification requires live-eligible cases and evidence capture.
+
+## Deterministic grading boundary
+
+Structured checks are authoritative only when the run record exposes the required structured evidence. A live text-only answer that lacks the necessary structure is WARN/UNSCORABLE for that check; the grader does not infer hidden facts from prose. Semantic grading is a later, separate layer.

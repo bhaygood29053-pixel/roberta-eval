@@ -7,6 +7,7 @@ from pathlib import Path
 from . import __version__
 from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
+from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .taxonomy import load_taxonomy, taxonomy_summary, validate_taxonomy
@@ -80,6 +81,24 @@ def run_suite(mode: str, limit: int | None, output: str | None, target: str | No
     return 0
 
 
+def grade_suite(input_path: str | None, output: str | None, limit: int | None) -> int:
+    if input_path:
+        records = load_run_jsonl(Path(input_path))
+    else:
+        records = run_cases(
+            materialize_cases(),
+            transport=FixtureRobertaTransport(),
+            run_id="grader-smoke",
+            target="fixture://local",
+            limit=limit,
+        )
+    results = grade_records(records)
+    if output:
+        write_grades(Path(output), results)
+    print(json.dumps(grader_summary(results), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -94,6 +113,10 @@ def main() -> int:
     run_parser.add_argument("--output", default=None)
     run_parser.add_argument("--target", default=None)
     run_parser.add_argument("--run-id", default="manual-run")
+    grade_parser = subparsers.add_parser("grade", help="grade normalized run records")
+    grade_parser.add_argument("--input", default=None)
+    grade_parser.add_argument("--output", default=None)
+    grade_parser.add_argument("--limit", type=int, default=20)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -106,6 +129,8 @@ def main() -> int:
         return corpus(args.output)
     if args.command == "run":
         return run_suite(args.mode, args.limit, args.output, args.target, args.run_id)
+    if args.command == "grade":
+        return grade_suite(args.input, args.output, args.limit)
 
     return 2
 

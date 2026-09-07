@@ -37,3 +37,6 @@ jobs:
 
       - name: Runtime harness smoke
         run: roberta-eval run --mode fixture --limit 5 --run-id ci-smoke --output /tmp/roberta-run.jsonl
+
+      - name: Deterministic grader smoke
+        run: roberta-eval grade --limit 20 --output /tmp/roberta-grades.jsonl
