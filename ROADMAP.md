@@ -90,8 +90,6 @@ Current LAB #6 implementation:
 
 Acceptance completed in merged LAB #6.
 
-## Active
-
 ### LAB #7 — Generated variation
 
 Generate thousands of reproducible surface variations without changing the underlying test objective or answer key.
@@ -105,15 +103,26 @@ Current LAB #7 implementation:
 - stable generated-suite SHA-256;
 - CLI/CI materialization and validation.
 
-Acceptance is complete when the LAB #7 PR is green and merged.
+Acceptance completed in merged LAB #7.
 
-## Next
+## Active
 
 ### LAB #8 — 2,500-question stress run
 
-Produce the first broad capability map of ROBERTA strengths, failures, and runtime issues.
+Run the first 2,500-case end-to-end Laboratory pipeline qualification and report coverage/verdicts.
 
-## Later
+Current LAB #8 implementation:
+- deterministic round-robin-like selection across surface signatures and blueprints;
+- exactly 2,500 generated cases with all 18 services represented;
+- fixture transport executes all selected cases;
+- deterministic grader evaluates all 2,500 results;
+- JSON and Markdown qualification reports;
+- explicit boundary: this qualifies Laboratory pipeline scale, not live ROBERTA answer quality;
+- CI executes the full qualification.
+
+Acceptance target: 2,500 PASS / 0 WARN / 0 FAIL on the fixture baseline, with all acceptance checks green.
+
+## Next-generation work
 
 - semantic and human-quality graders;
 - adversarial suites;
