@@ -173,8 +173,6 @@ Current LAB #12 implementation:
 
 Acceptance completed in merged LAB #12.
 
-## Active
-
 ### LAB #13 — Root Cause Localization v1
 Use available layer snapshots to identify the first proven incorrect component without guessing when evidence is absent.
 
@@ -187,12 +185,25 @@ Current LAB #13 implementation:
 - execution-boundary violations can localize to the observed ROBERTA response boundary;
 - CLI/CI localization.
 
-Acceptance is complete when the LAB #13 PR is green and merged.
+Acceptance completed in merged LAB #13.
 
-## Next
+## Active
 
 ### LAB #14 — Failure Clustering v1
-Collapse recurring failures into actionable defect clusters.
+Collapse recurring failures into stable actionable defect clusters.
+
+Current LAB #14 implementation:
+- stable cluster identity from category + service + localized layer + grader reason;
+- duplicate manifestations collapse to one cluster;
+- highest member severity becomes cluster severity;
+- UNKNOWN localization remains explicit;
+- evaluation-incomplete/error clusters remain non-product defects;
+- stable member/run/case provenance;
+- deterministic ordering and CLI/CI support.
+
+Acceptance is complete when the LAB #14 PR is green and merged.
+
+## Next
 
 ### LAB #15 — Regression Memory v1
 Persist confirmed defects as permanent replayable regression cases.

@@ -40,6 +40,7 @@ src/roberta_eval/
   conversation.py multi-turn generation, execution, and fact-consistency grading
   classifier.py   stable failure categories and severity normalization
   root_cause.py   conservative layer localization from explicit snapshots
+  clustering.py   stable recurring-defect clustering
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -115,3 +116,7 @@ A failure classifier labels observed grader/runtime findings; it does not create
 ## Root-cause localization boundary
 
 Localization is evidence-driven. Without a sufficient layer snapshot, product defects remain `unknown`; the Laboratory does not infer a failing component merely from the shape of an answer.
+
+## Failure-clustering boundary
+
+Clusters represent repeated manifestations of the same classified defect identity. The Laboratory does not cluster solely on wording similarity, and evaluation-incomplete findings remain separate from actionable product defects.

@@ -10,6 +10,7 @@ from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
 from .conversation import conversation_summary, consistency_summary, generate_conversations, grade_conversation_runs, run_conversations, write_conversations
 from .classifier import classification_summary, classify_results, load_jsonl as load_classification_jsonl, write_findings
+from .clustering import cluster_findings, cluster_summary, load_jsonl as load_cluster_jsonl, write_clusters
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .generator import generate_cases, generated_summary, write_generated
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
@@ -174,6 +175,16 @@ def localize_suite(input_path: str, output: str | None) -> int:
     return 0
 
 
+def cluster_suite(findings_path: str, localizations_path: str | None, output: str | None) -> int:
+    findings = load_cluster_jsonl(Path(findings_path))
+    localizations = load_cluster_jsonl(Path(localizations_path)) if localizations_path else None
+    clusters = cluster_findings(findings, localizations)
+    if output:
+        write_clusters(Path(output), clusters)
+    print(json.dumps(cluster_summary(clusters), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -211,6 +222,10 @@ def main() -> int:
     localize_parser = subparsers.add_parser("localize", help="conservatively localize classified findings")
     localize_parser.add_argument("--input", required=True)
     localize_parser.add_argument("--output", default=None)
+    cluster_parser = subparsers.add_parser("cluster", help="cluster recurring classified failures")
+    cluster_parser.add_argument("--findings", required=True)
+    cluster_parser.add_argument("--localizations", default=None)
+    cluster_parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -239,6 +254,8 @@ def main() -> int:
         return classify_suite(args.input, args.output)
     if args.command == "localize":
         return localize_suite(args.input, args.output)
+    if args.command == "cluster":
+        return cluster_suite(args.findings, args.localizations, args.output)
 
     return 2
 
