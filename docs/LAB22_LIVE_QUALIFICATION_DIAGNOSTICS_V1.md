@@ -1,8 +1,10 @@
 # LAB #22 — Live Qualification Diagnostics v1
 
-Status: **implementation candidate / pending merge acceptance**
+Status: **accepted / read-only diagnostic capability**
 
 Tracking issue: #45
+
+Accepted via PR #46 / merge `7eefde5355e99453f43cb4662226200b156cf7a0`.
 
 ## Purpose
 
