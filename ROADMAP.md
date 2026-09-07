@@ -132,8 +132,6 @@ Current LAB #9 implementation:
 
 Acceptance completed in merged LAB #9.
 
-## Active
-
 ### LAB #10 — Adversarial Suite v1
 Add systematic invariant attacks while preserving the underlying known-answer objective.
 
@@ -146,12 +144,25 @@ Current LAB #10 implementation:
 - stable IDs and digest;
 - CLI/CI generation.
 
-Acceptance is complete when the LAB #10 PR is green and merged.
+Acceptance completed in merged LAB #10.
 
-## Next
+## Active
 
 ### LAB #11 — Multi-turn Consistency v1
-Test context retention, contradiction, correction, and evidence evolution across conversations.
+Test fact stability, follow-up consistency, pressure resistance, and execution boundaries across no-new-evidence conversations.
+
+Current LAB #11 implementation:
+- 54 conversations / 162 turns across all 18 services;
+- three-turn initial/follow-up/pressure-reversal pattern;
+- original fixture, checks, evidence condition, and objective preserved across turns;
+- structured fact drift without an evidence event is FAIL;
+- execution violation in any turn is CRITICAL FAIL;
+- missing structured conversation evidence is WARN;
+- live HTTP session persistence remains explicitly unqualified until ROBERTA exposes a session/conversation contract.
+
+Acceptance is complete when the LAB #11 PR is green and merged.
+
+## Next
 
 ### LAB #12 — Failure Classification v1
 Map grader/runtime findings into stable defect categories and severities.
