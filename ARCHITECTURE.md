@@ -33,11 +33,13 @@ src/roberta_eval/
   corpus.py       deterministic corpus materialization and validation
   runner.py       fixture/HTTP transports and normalized run records
   grader.py       deterministic check evaluation and verdicts
+  generator.py    reproducible high-volume surface variation
 
 config/
   capabilities.json       ROBERTA capability inventory
   question_taxonomy.json  test-class and generation dimensions
   corpus_blueprints.json  reviewed known-answer case blueprints and style variants
+  generation_surfaces.json deterministic high-volume wording surfaces
 
 future/
   generators/     question/scenario generation

@@ -8,6 +8,7 @@ from . import __version__
 from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
+from .generator import generate_cases, generated_summary, write_generated
 from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .taxonomy import load_taxonomy, taxonomy_summary, validate_taxonomy
@@ -99,6 +100,14 @@ def grade_suite(input_path: str | None, output: str | None, limit: int | None) -
     return 0
 
 
+def generate_suite(output: str | None) -> int:
+    cases = generate_cases()
+    if output:
+        write_generated(Path(output), cases)
+    print(json.dumps(generated_summary(cases), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -117,6 +126,8 @@ def main() -> int:
     grade_parser.add_argument("--input", default=None)
     grade_parser.add_argument("--output", default=None)
     grade_parser.add_argument("--limit", type=int, default=20)
+    generate_parser = subparsers.add_parser("generate", help="materialize generated question suite")
+    generate_parser.add_argument("--write", dest="output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -131,6 +142,8 @@ def main() -> int:
         return run_suite(args.mode, args.limit, args.output, args.target, args.run_id)
     if args.command == "grade":
         return grade_suite(args.input, args.output, args.limit)
+    if args.command == "generate":
+        return generate_suite(args.output)
 
     return 2
 
