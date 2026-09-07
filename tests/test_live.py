@@ -60,6 +60,28 @@ def test_live_grader_requires_structured_telemetry() -> None:
     assert result["live_roberta_qualified"] is False
 
 
+def test_live_grader_requires_at_least_one_canonical_claim() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "No structured claim.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v1",
+                "evaluation_evidence": {"state": {"status": "unknown"}},
+                "claims": [],
+                "evidence_provenance": {"facts_authority": "chain_scout_cmis"},
+                "evidence_freshness": {"state": "unknown"},
+                "execution_authorized": False,
+            }
+        )
+    )
+
+    assert result["verdict"] == "EVIDENCE_REQUIRED"
+    assert result["reason"] == "canonical_claims_empty"
+    assert result["live_roberta_qualified"] is False
+
+
 def test_live_grader_passes_claims_that_match_evidence() -> None:
     result = grade_live_record(
         _live_record(
