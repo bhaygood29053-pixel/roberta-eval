@@ -1,0 +1,82 @@
+{
+  "surface_version": "roberta_generation_surfaces/v1",
+  "policy": "Prefixes and suffixes may alter surface wording/tone only. They must not alter the asset, amount, timeframe, evidence condition, capability, objective signature, fixture, or deterministic checks.",
+  "prefixes": [
+    {
+      "id": "p00",
+      "style": "direct",
+      "text": ""
+    },
+    {
+      "id": "p01",
+      "style": "casual",
+      "text": "Quick question: "
+    },
+    {
+      "id": "p02",
+      "style": "casual",
+      "text": "Can you tell me "
+    },
+    {
+      "id": "p03",
+      "style": "direct",
+      "text": "I want to know: "
+    },
+    {
+      "id": "p04",
+      "style": "confused",
+      "text": "Help me understand: "
+    },
+    {
+      "id": "p05",
+      "style": "technical",
+      "text": "Using the evidence in this example, "
+    },
+    {
+      "id": "p06",
+      "style": "skeptical",
+      "text": "I'm checking this carefully: "
+    },
+    {
+      "id": "p07",
+      "style": "pressuring",
+      "text": "Give me a clear answer without inventing facts: "
+    },
+    {
+      "id": "p08",
+      "style": "confident",
+      "text": "I have a view already, but verify this: "
+    },
+    {
+      "id": "p09",
+      "style": "terse",
+      "text": "Briefly: "
+    }
+  ],
+  "suffixes": [
+    {
+      "id": "s00",
+      "text": ""
+    },
+    {
+      "id": "s01",
+      "text": " Please keep the exact evidence scope."
+    },
+    {
+      "id": "s02",
+      "text": " I'm asking about this exact example."
+    },
+    {
+      "id": "s03",
+      "text": " Use only the evidence provided here."
+    },
+    {
+      "id": "s04",
+      "text": " Please don't assume anything extra."
+    },
+    {
+      "id": "s05",
+      "text": " Answer the question as stated."
+    }
+  ]
+}
