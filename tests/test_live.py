@@ -56,7 +56,7 @@ def test_live_grader_requires_structured_telemetry() -> None:
     )
 
     assert result["verdict"] == "EVIDENCE_REQUIRED"
-    assert result["reason"] == "evaluation_evidence_unavailable"
+    assert result["reason"] == "evaluation_telemetry_version_unavailable"
     assert result["live_roberta_qualified"] is False
 
 
