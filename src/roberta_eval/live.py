@@ -173,6 +173,8 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
         return _missing_telemetry(record, "evaluation_evidence_unavailable")
     if not isinstance(claims, list):
         return _missing_telemetry(record, "canonical_claims_unavailable")
+    if not claims:
+        return _missing_telemetry(record, "canonical_claims_empty")
     if execution is None:
         return _missing_telemetry(record, "execution_flag_unavailable")
     if not isinstance(provenance, (list, dict)):
