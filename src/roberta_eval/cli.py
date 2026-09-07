@@ -18,6 +18,7 @@ from .github_promotion import build_issue_proposals, load_jsonl as load_proposal
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
 from .regression_memory import load_memory, memory_summary, validate_memory
+from .release_qualification import qualify_release, write_qualification
 from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .stress import run_stress_qualification, write_stress_json, write_stress_markdown
@@ -230,6 +231,17 @@ def proposal_suite(clusters_path: str, confirmed: list[str], output: str | None)
     return 0
 
 
+def release_qualification_suite(scope: str, output: str | None) -> int:
+    report = qualify_release(
+        requested_scope=scope,
+        qualification_report=run_stress_qualification(limit=2500),
+    )
+    if output:
+        write_qualification(Path(output), report)
+    print(json.dumps(report, indent=2, sort_keys=True))
+    return 0 if report["release_qualified"] or report["status"] == "EVIDENCE_REQUIRED" else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -280,6 +292,9 @@ def main() -> int:
     proposal_parser.add_argument("--clusters", required=True)
     proposal_parser.add_argument("--confirm", action="append", default=[])
     proposal_parser.add_argument("--output", default=None)
+    release_parser = subparsers.add_parser("release-qualify", help="evaluate release qualification gates")
+    release_parser.add_argument("--scope", choices=("fixture_pipeline", "live_roberta"), default="fixture_pipeline")
+    release_parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -318,6 +333,8 @@ def main() -> int:
         return dashboard_suite(args.json_output, args.markdown_output)
     if args.command == "defect-proposals":
         return proposal_suite(args.clusters, args.confirm, args.output)
+    if args.command == "release-qualify":
+        return release_qualification_suite(args.scope, args.output)
 
     return 2
 

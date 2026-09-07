@@ -45,6 +45,7 @@ src/roberta_eval/
   trends.py       normalized longitudinal quality comparisons
   dashboard.py    presentation-only evaluation view model and Markdown
   github_promotion.py review-gated GitHub defect proposals
+  release_qualification.py evidence-aware release gates
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -55,6 +56,7 @@ config/
   conversation_patterns.json multi-turn no-new-evidence patterns
   regression_memory.json permanent confirmed regression cases
   trend_history.json versioned longitudinal evaluation snapshots
+  release_policy.json deterministic blocking and advisory warning policy
 
 future/
   generators/     question/scenario generation
@@ -142,3 +144,7 @@ The dashboard is presentation-only. It must preserve source qualification scope 
 ## GitHub defect-promotion boundary
 
 The Laboratory produces reviewable issue proposals only from explicitly confirmed actionable clusters. Proposal generation does not create an issue automatically, and UNKNOWN localization remains unassigned until evidence improves.
+
+## Release-qualification boundary
+
+Deterministic failures, critical findings, failed regression replays, and deterministic regressions may block qualification. Advisory human-quality metrics can warn but cannot override a deterministic block. Live release qualification requires live-qualified evidence.

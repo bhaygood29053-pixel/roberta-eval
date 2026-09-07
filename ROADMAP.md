@@ -245,8 +245,6 @@ Current LAB #17 implementation:
 
 Acceptance completed in merged LAB #17.
 
-## Active
-
 ### LAB #18 — GitHub Defect Promotion v1
 Generate reviewable, deduplicated GitHub issue proposals from explicitly confirmed actionable clusters.
 
@@ -261,12 +259,26 @@ Current LAB #18 implementation:
 - evidence IDs, occurrence count, severity, and replay guidance included;
 - proposal generation never claims an issue was created.
 
-Acceptance is complete when the LAB #18 PR is green and merged.
+Acceptance completed in merged LAB #18.
 
-## Next
+## Active
 
 ### LAB #19 — Release Qualification v1
-Define evidence-aware release gates that combine deterministic and advisory metrics appropriately.
+Define evidence-aware release gates with deterministic blocking authority and advisory human-quality warnings.
+
+Current LAB #19 implementation:
+- versioned release policy;
+- QUALIFIED / QUALIFIED_WITH_ADVISORY_WARNINGS / BLOCKED / EVIDENCE_REQUIRED states;
+- deterministic failures and critical findings block;
+- regression replay failures block;
+- deterministic regression can block;
+- low human-quality score warns but cannot override facts;
+- live scope requires live-qualified evidence;
+- current fixture pipeline can qualify only its own scope.
+
+Acceptance is complete when the LAB #19 PR is green and merged.
+
+## Next
 
 ### LAB #20 — 10k/25k Scale Suites
 Scale generated/adversarial/conversation suites while preserving objective quality.
