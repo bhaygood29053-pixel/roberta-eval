@@ -55,3 +55,6 @@ jobs:
 
       - name: Multi-turn consistency suite
         run: roberta-eval conversations --write /tmp/roberta-conversations.json
+
+      - name: Failure classification smoke
+        run: roberta-eval classify --input /tmp/roberta-grades.jsonl --output /tmp/roberta-findings.jsonl
