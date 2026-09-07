@@ -261,8 +261,6 @@ Current LAB #18 implementation:
 
 Acceptance completed in merged LAB #18.
 
-## Active
-
 ### LAB #19 — Release Qualification v1
 Define evidence-aware release gates with deterministic blocking authority and advisory human-quality warnings.
 
@@ -276,12 +274,23 @@ Current LAB #19 implementation:
 - live scope requires live-qualified evidence;
 - current fixture pipeline can qualify only its own scope.
 
-Acceptance is complete when the LAB #19 PR is green and merged.
-
-## Next
+Acceptance completed in merged LAB #19.
 
 ### LAB #20 — 10k/25k Scale Suites
-Scale generated/adversarial/conversation suites while preserving objective quality.
+Scale the deterministic fixture pipeline to 10,000 and 25,000 cases while preserving reviewed blueprint semantics.
+
+Current LAB #20 implementation:
+- 500 deterministic wording surfaces per reviewed blueprint;
+- 27,000-case source scale suite from 54 blueprints;
+- stable unique IDs and suite/selection digests;
+- original service, fixture, evidence condition, objective signature, and checks preserved;
+- deterministic 10k and 25k selections cover all 18 services;
+- full fixture transport + deterministic grading qualification;
+- exact PASS/WARN/FAIL reporting;
+- explicit non-live boundary;
+- CI executes both 10,000-case and 25,000-case gates.
+
+Acceptance completed by the green LAB #20 merge.
 
 ## Quality rule
 
