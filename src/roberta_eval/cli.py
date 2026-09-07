@@ -13,6 +13,7 @@ from .classifier import classification_summary, classify_results, load_jsonl as 
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .generator import generate_cases, generated_summary, write_generated
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
+from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
 from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .stress import run_stress_qualification, write_stress_json, write_stress_markdown
@@ -164,6 +165,15 @@ def classify_suite(input_path: str, output: str | None) -> int:
     return 0
 
 
+def localize_suite(input_path: str, output: str | None) -> int:
+    findings = load_localization_jsonl(Path(input_path))
+    results = localize_findings(findings)
+    if output:
+        write_localizations(Path(output), results)
+    print(json.dumps(localization_summary(results), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -198,6 +208,9 @@ def main() -> int:
     classify_parser = subparsers.add_parser("classify", help="classify deterministic grader findings")
     classify_parser.add_argument("--input", required=True)
     classify_parser.add_argument("--output", default=None)
+    localize_parser = subparsers.add_parser("localize", help="conservatively localize classified findings")
+    localize_parser.add_argument("--input", required=True)
+    localize_parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -224,6 +237,8 @@ def main() -> int:
         return conversation_suite(args.output)
     if args.command == "classify":
         return classify_suite(args.input, args.output)
+    if args.command == "localize":
+        return localize_suite(args.input, args.output)
 
     return 2
 
