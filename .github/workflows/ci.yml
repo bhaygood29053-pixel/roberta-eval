@@ -67,3 +67,6 @@ jobs:
 
       - name: Regression memory
         run: roberta-eval regressions
+
+      - name: Trend intelligence
+        run: roberta-eval trends

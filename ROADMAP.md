@@ -201,8 +201,6 @@ Current LAB #14 implementation:
 
 Acceptance completed in merged LAB #14.
 
-## Active
-
 ### LAB #15 — Regression Memory v1
 Persist confirmed actionable product defects as permanent replayable regression cases.
 
@@ -216,12 +214,26 @@ Current LAB #15 implementation:
 - execution remains unauthorized;
 - CLI/CI memory validation.
 
-Acceptance is complete when the LAB #15 PR is green and merged.
+Acceptance completed in merged LAB #15.
 
-## Next
+## Active
 
 ### LAB #16 — Trend Intelligence v1
-Compare evaluation runs/releases and quantify improvement/regression.
+Compare evaluation runs/releases using normalized deterministic and advisory metrics.
+
+Current LAB #16 implementation:
+- versioned trend snapshots and repository history;
+- normalized PASS/WARN/FAIL rates;
+- critical finding and actionable-cluster trends;
+- advisory human-quality trend remains non-authoritative;
+- explicit higher/lower-is-better directions;
+- IMPROVED/REGRESSED/STABLE comparisons;
+- incompatible scope rejection and idempotent history append;
+- fixture-pipeline vs live-ROBERTA scope preserved.
+
+Acceptance is complete when the LAB #16 PR is green and merged.
+
+## Next
 
 ### LAB #17 — Evaluation Dashboard v1
 Render compact human-readable quality and trend dashboards.
