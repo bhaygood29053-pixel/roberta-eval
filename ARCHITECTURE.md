@@ -28,9 +28,14 @@ The Laboratory is intentionally separate from ROBERTA production code.
 src/roberta_eval/
   config.py       repository and run configuration
   cli.py          operator entry point
+  registry.py     capability registry validation
+  taxonomy.py     question taxonomy validation
+
+config/
+  capabilities.json       ROBERTA capability inventory
+  question_taxonomy.json  test-class and generation dimensions
 
 future/
-  registry/       capability registry
   generators/     question/scenario generation
   runners/        runtime execution
   collectors/     ROBERTA/Scout/CMIS evidence capture
