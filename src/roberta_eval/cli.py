@@ -37,6 +37,7 @@ def doctor() -> int:
     validate_taxonomy(taxonomy, registry)
     cases = materialize_cases()
     corpus = corpus_summary(cases)
+    live_cases = materialize_live_cases()
     result = {
         "service": "roberta-eval",
         "version": __version__,
@@ -51,6 +52,8 @@ def doctor() -> int:
         "question_class_count": len(taxonomy["classes"]),
         "deterministic_case_count": corpus["case_count"],
         "deterministic_corpus_sha256": corpus["sha256"],
+        "live_case_count": len(live_cases),
+        "live_subject_count": len({case["subject"]["id"] for case in live_cases}),
     }
     print(json.dumps(result, sort_keys=True))
     return 0
