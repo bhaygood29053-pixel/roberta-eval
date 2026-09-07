@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 from . import __version__
 from .config import default_config_path, load_config, validate_config
+from .corpus import corpus_summary, materialize_cases, write_corpus
 from .registry import load_registry, registry_summary, validate_registry
 from .taxonomy import load_taxonomy, taxonomy_summary, validate_taxonomy
 
@@ -16,6 +18,8 @@ def doctor() -> int:
     validate_registry(registry)
     taxonomy = load_taxonomy()
     validate_taxonomy(taxonomy, registry)
+    cases = materialize_cases()
+    corpus = corpus_summary(cases)
     result = {
         "service": "roberta-eval",
         "version": __version__,
@@ -28,6 +32,8 @@ def doctor() -> int:
         "cmis_service_count": len(registry["cmis_services"]),
         "human_workflow_count": len(registry["human_workflows"]),
         "question_class_count": len(taxonomy["classes"]),
+        "deterministic_case_count": corpus["case_count"],
+        "deterministic_corpus_sha256": corpus["sha256"],
     }
     print(json.dumps(result, sort_keys=True))
     return 0
@@ -43,12 +49,22 @@ def taxonomy() -> int:
     return 0
 
 
+def corpus(output: str | None = None) -> int:
+    cases = materialize_cases()
+    if output:
+        write_corpus(Path(output), cases)
+    print(json.dumps(corpus_summary(cases), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("doctor", help="validate Laboratory configuration, registry, and taxonomy")
     subparsers.add_parser("capabilities", help="validate and summarize the capability registry")
     subparsers.add_parser("taxonomy", help="validate and summarize the question taxonomy")
+    corpus_parser = subparsers.add_parser("corpus", help="validate and summarize deterministic corpus")
+    corpus_parser.add_argument("--write", dest="output", help="write materialized JSONL corpus")
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -57,6 +73,8 @@ def main() -> int:
         return capabilities()
     if args.command == "taxonomy":
         return taxonomy()
+    if args.command == "corpus":
+        return corpus(args.output)
 
     return 2
 
