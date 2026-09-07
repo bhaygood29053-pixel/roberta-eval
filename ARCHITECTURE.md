@@ -31,6 +31,7 @@ src/roberta_eval/
   registry.py     capability registry validation
   taxonomy.py     question taxonomy validation
   corpus.py       deterministic corpus materialization and validation
+  runner.py       fixture/HTTP transports and normalized run records
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -75,3 +76,7 @@ Every executed case should eventually produce a durable record containing at lea
 5. One underlying defect should not become hundreds of duplicate engineering issues.
 6. Real failures become regression memory.
 7. The Laboratory itself must be tested and versioned.
+
+## Runtime harness boundary
+
+The deterministic corpus is fixture-backed and may be executed through the fixture transport in CI. The HTTP transport is a real ROBERTA bridge adapter, but running a synthetic fixture question against a live chain does not convert the synthetic answer key into live truth. Live semantic qualification requires live-eligible cases and evidence capture.
