@@ -8,6 +8,7 @@ from . import __version__
 from .adversarial import adversarial_summary, generate_adversarial_cases, write_adversarial
 from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
+from .conversation import conversation_summary, consistency_summary, generate_conversations, grade_conversation_runs, run_conversations, write_conversations
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .generator import generate_cases, generated_summary, write_generated
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
@@ -138,6 +139,21 @@ def adversarial_suite(output: str | None) -> int:
     return 0
 
 
+def conversation_suite(output: str | None) -> int:
+    conversations = generate_conversations()
+    runs = run_conversations(conversations)
+    grades = grade_conversation_runs(runs)
+    if output:
+        write_conversations(Path(output), conversations)
+    payload = {
+        "suite": conversation_summary(conversations),
+        "consistency": consistency_summary(grades),
+        "live_http_session_qualified": False,
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0 if payload["consistency"]["verdict_counts"]["FAIL"] == 0 else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -167,6 +183,8 @@ def main() -> int:
     quality_parser.add_argument("--output", default=None)
     adversarial_parser = subparsers.add_parser("adversarial", help="materialize adversarial suite")
     adversarial_parser.add_argument("--write", dest="output", default=None)
+    conversation_parser = subparsers.add_parser("conversations", help="run fixture multi-turn consistency suite")
+    conversation_parser.add_argument("--write", dest="output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -189,6 +207,8 @@ def main() -> int:
         return quality_suite(args.input, args.output)
     if args.command == "adversarial":
         return adversarial_suite(args.output)
+    if args.command == "conversations":
+        return conversation_suite(args.output)
 
     return 2
 
