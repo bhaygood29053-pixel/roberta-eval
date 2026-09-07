@@ -38,6 +38,7 @@ src/roberta_eval/
   quality.py      advisory human-response quality scoring
   adversarial.py  invariant-targeted adversarial suite generation
   conversation.py multi-turn generation, execution, and fact-consistency grading
+  classifier.py   stable failure categories and severity normalization
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -105,3 +106,7 @@ Human-quality scores are secondary signals. They may identify poor clarity, weak
 ## Multi-turn runtime boundary
 
 The current public HTTP adapter posts individual messages and does not expose an explicit session/conversation identifier. Therefore fixture multi-turn consistency is qualified, but live HTTP context retention remains unqualified until ROBERTA exposes and documents a session contract.
+
+## Failure-classification boundary
+
+A failure classifier labels observed grader/runtime findings; it does not create facts. Missing structured evidence is classified as evaluation incompleteness rather than silently promoted into a ROBERTA defect.
