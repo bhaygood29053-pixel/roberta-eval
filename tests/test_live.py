@@ -100,6 +100,7 @@ def test_live_grader_fails_claim_evidence_mismatch() -> None:
                 "service": "roberta_bridge",
                 "status": "ok",
                 "reply": "Mismatch example.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v1",
                 "evaluation_evidence": {"asset": {"symbol": "XNT"}},
                 "claims": [
                     {
