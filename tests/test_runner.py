@@ -128,6 +128,38 @@ def test_http_transport_parses_bridge_json(monkeypatch) -> None:
     assert response["reply"] == "hello"
 
 
+def test_http_transport_adds_evaluation_mode_only_when_requested(monkeypatch) -> None:
+    captured = {}
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self):
+            return json.dumps(
+                {"service": "roberta_bridge", "status": "ok", "reply": "hello"}
+            ).encode("utf-8")
+
+    def fake_urlopen(req, timeout):
+        captured["body"] = json.loads(req.data.decode("utf-8"))
+        return FakeResponse()
+
+    monkeypatch.setattr(urlrequest, "urlopen", fake_urlopen)
+    case = materialize_cases()[0]
+    HttpRobertaTransport(
+        "http://127.0.0.1:8766",
+        evaluation_mode="roberta_evaluation_telemetry/v1",
+    ).send(case["question"], case=case)
+
+    assert captured["body"] == {
+        "message": case["question"],
+        "evaluation_mode": "roberta_evaluation_telemetry/v1",
+    }
+
+
 def test_http_transport_rejects_non_json(monkeypatch) -> None:
     class FakeResponse:
         def __enter__(self):
