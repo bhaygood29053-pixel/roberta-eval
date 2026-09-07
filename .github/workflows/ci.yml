@@ -64,3 +64,6 @@ jobs:
 
       - name: Failure clustering smoke
         run: roberta-eval cluster --findings /tmp/roberta-findings.jsonl --localizations /tmp/roberta-localizations.jsonl --output /tmp/roberta-clusters.jsonl
+
+      - name: Regression memory
+        run: roberta-eval regressions
