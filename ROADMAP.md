@@ -1,6 +1,6 @@
 # ROBERTA Evaluation Laboratory Roadmap
 
-## Active
+## Completed
 
 ### LAB #1 — Repository foundation
 
@@ -14,11 +14,23 @@ Acceptance:
 - CI exists;
 - Laboratory contract, architecture, and roadmap exist.
 
-## Next
+## Active
 
 ### LAB #2 — Capability Registry v1
 
 Create the authoritative inventory of ROBERTA services/capabilities, required evidence, supported question families, freshness rules, allowed conclusions, and known limitations.
+
+Current LAB #2 implementation:
+- 18 current ROBERTA-side CMIS service contracts represented;
+- 10 Human Response v1 workflow families represented;
+- source repository/ref/observed commit recorded;
+- contract exposure is explicitly separated from live evidence health;
+- deterministic validation rejects parity drift, duplicate IDs, unsafe execution authorization, and invalid workflow mappings;
+- CLI and CI validate the registry.
+
+Acceptance is complete when the LAB #2 PR is green and merged.
+
+## Next
 
 ### LAB #3 — Question Taxonomy v1
 
