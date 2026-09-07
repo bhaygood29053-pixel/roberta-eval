@@ -292,6 +292,25 @@ Current LAB #20 implementation:
 
 Acceptance completed by the green LAB #20 merge.
 
+
+### LAB #21 — Live Evidence-Backed Evaluation v1
+
+Create a real-subject live evaluation track that is explicitly separate from synthetic fixture qualification.
+
+Current LAB #21 implementation:
+- XNT and AGI seed subjects across 10 live service/question families (20-case smoke plan);
+- no synthetic fixture or hardcoded live answer key;
+- balanced small-run selection across service/taxonomy groups;
+- explicit `live_evidence` run-record mode;
+- read-only evaluation telemetry contract for evidence, canonical claims, provenance, freshness, and execution boundary;
+- `EVIDENCE_REQUIRED` when telemetry is absent instead of guessed PASS/FAIL;
+- claim-to-evidence path validation when telemetry is present;
+- accepted `roberta_claim_integrity/v1` PASS required for bounded live PASS;
+- bounded evidence-contract qualification kept separate from provider-truth/full-natural-language certification;
+- deterministic CI validates the live plan and Laboratory logic without provider keys.
+
+Acceptance completes when the LAB #21 PR is green and merged; live ROBERTA qualification additionally depends on ROBERTA exposing the read-only telemetry contract.
+
 ## Quality rule
 
 Scale is not success by itself. A smaller suite with trustworthy expectations is more valuable than thousands of poorly specified questions.

@@ -15,12 +15,13 @@ from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .dashboard import build_dashboard, write_dashboard_json, write_dashboard_markdown
 from .generator import generate_cases, generated_summary, write_generated
 from .github_promotion import build_issue_proposals, load_jsonl as load_proposal_jsonl, proposal_summary, write_proposals
+from .live import LIVE_TELEMETRY_VERSION, grade_live_records, live_case_summary, live_grader_summary, materialize_live_cases, write_live_cases, write_live_grades
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
 from .regression_memory import load_memory, memory_summary, validate_memory
 from .release_qualification import qualify_release, write_qualification
 from .registry import load_registry, registry_summary, validate_registry
-from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
+from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, select_cases, write_run
 from .scale import run_scale_qualification, scale_summary, generate_scale_cases, write_scale_report
 from .stress import run_stress_qualification, write_stress_json, write_stress_markdown
 from .taxonomy import load_taxonomy, taxonomy_summary, validate_taxonomy
@@ -36,6 +37,7 @@ def doctor() -> int:
     validate_taxonomy(taxonomy, registry)
     cases = materialize_cases()
     corpus = corpus_summary(cases)
+    live_cases = materialize_live_cases()
     result = {
         "service": "roberta-eval",
         "version": __version__,
@@ -50,6 +52,8 @@ def doctor() -> int:
         "question_class_count": len(taxonomy["classes"]),
         "deterministic_case_count": corpus["case_count"],
         "deterministic_corpus_sha256": corpus["sha256"],
+        "live_case_count": len(live_cases),
+        "live_subject_count": len({case["subject"]["id"] for case in live_cases}),
     }
     print(json.dumps(result, sort_keys=True))
     return 0
@@ -73,7 +77,7 @@ def corpus(output: str | None = None) -> int:
     return 0
 
 
-def run_suite(mode: str, limit: int | None, output: str | None, target: str | None, run_id: str) -> int:
+def run_suite(mode: str, limit: int | None, output: str | None, target: str | None, run_id: str, selection: str = "sequential") -> int:
     config = load_config()
     selected_target = target or config["lab"]["default_target"]
     if mode == "http":
@@ -88,11 +92,65 @@ def run_suite(mode: str, limit: int | None, output: str | None, target: str | No
         run_id=run_id,
         target=selected_target,
         limit=limit,
+        selection=selection,
     )
     if output:
         write_run(Path(output), records)
     print(json.dumps(run_summary(records), indent=2, sort_keys=True))
     return 0
+
+
+def live_plan_suite(limit: int | None, output: str | None) -> int:
+    cases = select_cases(
+        materialize_live_cases(),
+        limit=limit,
+        strategy="balanced",
+    )
+    if output:
+        write_live_cases(Path(output), cases)
+    print(json.dumps(live_case_summary(cases), indent=2, sort_keys=True))
+    return 0
+
+
+def live_run_suite(
+    limit: int | None,
+    output: str | None,
+    target: str | None,
+    run_id: str,
+) -> int:
+    config = load_config()
+    selected_target = target or config["lab"]["default_target"]
+    cases = select_cases(
+        materialize_live_cases(),
+        limit=limit,
+        strategy="balanced",
+    )
+    records = run_cases(
+        cases,
+        transport=HttpRobertaTransport(
+            selected_target,
+            evaluation_mode=LIVE_TELEMETRY_VERSION,
+        ),
+        run_id=run_id,
+        target=selected_target,
+    )
+    if output:
+        write_run(Path(output), records)
+    summary = run_summary(records)
+    summary["qualification_scope"] = "live_roberta"
+    summary["synthetic_ground_truth_used"] = False
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 0
+
+
+def live_grade_suite(input_path: str, output: str | None) -> int:
+    records = load_run_jsonl(Path(input_path))
+    results = grade_live_records(records)
+    if output:
+        write_live_grades(Path(output), results)
+    summary = live_grader_summary(results)
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 1 if summary["verdict_counts"]["FAIL"] else 0
 
 
 def grade_suite(input_path: str | None, output: str | None, limit: int | None) -> int:
@@ -265,6 +323,18 @@ def main() -> int:
     run_parser.add_argument("--output", default=None)
     run_parser.add_argument("--target", default=None)
     run_parser.add_argument("--run-id", default="manual-run")
+    run_parser.add_argument("--selection", choices=("sequential", "balanced"), default="sequential")
+    live_plan_parser = subparsers.add_parser("live-plan", help="materialize balanced real-subject live evaluation cases")
+    live_plan_parser.add_argument("--limit", type=int, default=20)
+    live_plan_parser.add_argument("--write", dest="output", default=None)
+    live_run_parser = subparsers.add_parser("live-run", help="execute balanced live-evidence cases through ROBERTA HTTP")
+    live_run_parser.add_argument("--limit", type=int, default=20)
+    live_run_parser.add_argument("--output", default=None)
+    live_run_parser.add_argument("--target", default=None)
+    live_run_parser.add_argument("--run-id", default="live-manual-run")
+    live_grade_parser = subparsers.add_parser("live-grade", help="grade live ROBERTA run records against captured evidence telemetry")
+    live_grade_parser.add_argument("--input", required=True)
+    live_grade_parser.add_argument("--output", default=None)
     grade_parser = subparsers.add_parser("grade", help="grade normalized run records")
     grade_parser.add_argument("--input", default=None)
     grade_parser.add_argument("--output", default=None)
@@ -318,7 +388,13 @@ def main() -> int:
     if args.command == "corpus":
         return corpus(args.output)
     if args.command == "run":
-        return run_suite(args.mode, args.limit, args.output, args.target, args.run_id)
+        return run_suite(args.mode, args.limit, args.output, args.target, args.run_id, args.selection)
+    if args.command == "live-plan":
+        return live_plan_suite(args.limit, args.output)
+    if args.command == "live-run":
+        return live_run_suite(args.limit, args.output, args.target, args.run_id)
+    if args.command == "live-grade":
+        return live_grade_suite(args.input, args.output)
     if args.command == "grade":
         return grade_suite(args.input, args.output, args.limit)
     if args.command == "generate":

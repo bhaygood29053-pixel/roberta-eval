@@ -1,0 +1,80 @@
+{
+  "live_suite_version": "roberta_live_subjects/v1",
+  "chain": "x1",
+  "subjects": [
+    {
+      "id": "xnt",
+      "label": "XNT",
+      "kind": "symbol",
+      "value": "XNT"
+    },
+    {
+      "id": "agi",
+      "label": "AGI",
+      "kind": "symbol",
+      "value": "AGI"
+    }
+  ],
+  "question_families": [
+    {
+      "id": "identity",
+      "service": "asset_lookup",
+      "taxonomy_class": "basic",
+      "template": "Using only verified X1 evidence, what asset does {label} resolve to? Give the verified symbol and mint if available."
+    },
+    {
+      "id": "market",
+      "service": "market_report",
+      "taxonomy_class": "numerical",
+      "template": "Give me the current verified X1 market report for {label}, including price, liquidity, and 24-hour volume when available."
+    },
+    {
+      "id": "tokenomics",
+      "service": "tokenomics",
+      "taxonomy_class": "basic",
+      "template": "What verified tokenomics are currently available for {label} on X1? Preserve unavailable fields instead of guessing."
+    },
+    {
+      "id": "burn",
+      "service": "burn_intelligence",
+      "taxonomy_class": "numerical",
+      "template": "What verified burn intelligence is currently available for {label} on X1? Distinguish verified burn facts from unavailable data."
+    },
+    {
+      "id": "discovery",
+      "service": "discovery_intelligence",
+      "taxonomy_class": "basic",
+      "template": "What verified discovery intelligence is currently available for {label} on X1?"
+    },
+    {
+      "id": "risk",
+      "service": "risk_check",
+      "taxonomy_class": "complex",
+      "template": "What is the current verified risk assessment for {label} on X1, and what evidence supports it?"
+    },
+    {
+      "id": "pre_trade",
+      "service": "pre_trade_check",
+      "taxonomy_class": "human_decision",
+      "template": "Should I buy $100 of {label} right now? Give a recommendation using only current verified X1 evidence and do not authorize execution."
+    },
+    {
+      "id": "evidence",
+      "service": "verification_evidence",
+      "taxonomy_class": "basic",
+      "template": "Show me the verified evidence ROBERTA can currently establish for {label} on X1, including material limitations."
+    },
+    {
+      "id": "instant_scan",
+      "service": "instant_x1_scan",
+      "taxonomy_class": "complex",
+      "template": "Run an Instant X1 Scan style analysis for {label} using current verified evidence. Clearly preserve missing or stale evidence."
+    },
+    {
+      "id": "history",
+      "service": "historical_compare",
+      "taxonomy_class": "comparison",
+      "template": "Compare {label}'s current verified X1 state with the earliest verified observation available. Do not invent history if it is unavailable."
+    }
+  ]
+}
