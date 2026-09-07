@@ -12,6 +12,7 @@ from .conversation import conversation_summary, consistency_summary, generate_co
 from .classifier import classification_summary, classify_results, load_jsonl as load_classification_jsonl, write_findings
 from .clustering import cluster_findings, cluster_summary, load_jsonl as load_cluster_jsonl, write_clusters
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
+from .dashboard import build_dashboard, write_dashboard_json, write_dashboard_markdown
 from .generator import generate_cases, generated_summary, write_generated
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
@@ -201,6 +202,21 @@ def trend_suite() -> int:
     return 0
 
 
+def dashboard_suite(json_output: str | None, markdown_output: str | None) -> int:
+    qualification = run_stress_qualification(limit=2500)
+    view = build_dashboard(
+        qualification=qualification,
+        regression_memory=memory_summary(load_memory()),
+        trend_history=history_summary(load_history()),
+    )
+    if json_output:
+        write_dashboard_json(Path(json_output), view)
+    if markdown_output:
+        write_dashboard_markdown(Path(markdown_output), view)
+    print(json.dumps(view, indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -244,6 +260,9 @@ def main() -> int:
     cluster_parser.add_argument("--output", default=None)
     subparsers.add_parser("regressions", help="validate and summarize permanent regression memory")
     subparsers.add_parser("trends", help="validate and summarize longitudinal trend history")
+    dashboard_parser = subparsers.add_parser("dashboard", help="render current Laboratory dashboard")
+    dashboard_parser.add_argument("--json", dest="json_output", default=None)
+    dashboard_parser.add_argument("--markdown", dest="markdown_output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -278,6 +297,8 @@ def main() -> int:
         return regression_memory_suite()
     if args.command == "trends":
         return trend_suite()
+    if args.command == "dashboard":
+        return dashboard_suite(args.json_output, args.markdown_output)
 
     return 2
 

@@ -43,6 +43,7 @@ src/roberta_eval/
   clustering.py   stable recurring-defect clustering
   regression_memory.py confirmed replayable defect memory
   trends.py       normalized longitudinal quality comparisons
+  dashboard.py    presentation-only evaluation view model and Markdown
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -132,3 +133,7 @@ Permanent regression memory is confirmation-gated. Evaluation-system failures, u
 ## Trend-intelligence boundary
 
 Deterministic correctness trends and advisory human-quality trends are separate. Fixture-pipeline history cannot be relabeled as live ROBERTA quality history, and advisory improvement cannot erase deterministic regression.
+
+## Dashboard boundary
+
+The dashboard is presentation-only. It must preserve source qualification scope and cannot recompute evidence, overrule deterministic graders, or represent fixture results as live ROBERTA proof.
