@@ -69,6 +69,7 @@ class FixtureRobertaTransport:
             "status": "ok",
             "reply": "Deterministic fixture transport response.",
             "fixture": case["fixture"],
+            "claims": [],
             "execution_authorized": False,
         }
 
