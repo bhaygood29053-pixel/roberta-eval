@@ -168,4 +168,4 @@ LAB #21 creates a separate `live_evidence` case mode. Live cases contain real X1
 - evidence provenance and freshness metadata;
 - `execution_authorized=false`.
 
-The live grader checks canonical claim values directly against the captured evidence object. Missing telemetry becomes `EVIDENCE_REQUIRED`; a mismatch becomes FAIL. The Laboratory never teaches ROBERTA fake fixture identities or rewrites production behavior to satisfy a test.
+The live grader checks canonical claim values directly against the captured evidence object and requires an accepted `roberta_claim_integrity/v1` PASS certificate. Missing telemetry becomes `EVIDENCE_REQUIRED`; a mismatch becomes FAIL. Because Claim Integrity is explicitly bounded and does not certify provider truth or every natural-language claim, LAB #21 reports `live_evidence_contract_qualified` separately and keeps `live_roberta_qualified=false`. The Laboratory never teaches ROBERTA fake fixture identities or rewrites production behavior to satisfy a test.
