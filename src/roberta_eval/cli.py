@@ -11,6 +11,7 @@ from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .generator import generate_cases, generated_summary, write_generated
 from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
+from .stress import run_stress_qualification, write_stress_json, write_stress_markdown
 from .taxonomy import load_taxonomy, taxonomy_summary, validate_taxonomy
 
 
@@ -108,6 +109,16 @@ def generate_suite(output: str | None) -> int:
     return 0
 
 
+def stress_suite(limit: int, json_output: str | None, markdown_output: str | None) -> int:
+    report = run_stress_qualification(limit=limit)
+    if json_output:
+        write_stress_json(Path(json_output), report)
+    if markdown_output:
+        write_stress_markdown(Path(markdown_output), report)
+    print(json.dumps(report, indent=2, sort_keys=True))
+    return 0 if report["accepted"] else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -128,6 +139,10 @@ def main() -> int:
     grade_parser.add_argument("--limit", type=int, default=20)
     generate_parser = subparsers.add_parser("generate", help="materialize generated question suite")
     generate_parser.add_argument("--write", dest="output", default=None)
+    stress_parser = subparsers.add_parser("stress", help="run fixture pipeline stress qualification")
+    stress_parser.add_argument("--limit", type=int, default=2500)
+    stress_parser.add_argument("--json", dest="json_output", default=None)
+    stress_parser.add_argument("--markdown", dest="markdown_output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -144,6 +159,8 @@ def main() -> int:
         return grade_suite(args.input, args.output, args.limit)
     if args.command == "generate":
         return generate_suite(args.output)
+    if args.command == "stress":
+        return stress_suite(args.limit, args.json_output, args.markdown_output)
 
     return 2
 

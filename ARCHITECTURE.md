@@ -34,6 +34,7 @@ src/roberta_eval/
   runner.py       fixture/HTTP transports and normalized run records
   grader.py       deterministic check evaluation and verdicts
   generator.py    reproducible high-volume surface variation
+  stress.py       large-suite qualification and reporting
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -87,3 +88,7 @@ The deterministic corpus is fixture-backed and may be executed through the fixtu
 ## Deterministic grading boundary
 
 Structured checks are authoritative only when the run record exposes the required structured evidence. A live text-only answer that lacks the necessary structure is WARN/UNSCORABLE for that check; the grader does not infer hidden facts from prose. Semantic grading is a later, separate layer.
+
+## Stress qualification semantics
+
+The default 2,500-case stress gate qualifies Laboratory pipeline scale using fixture evidence. The report carries `live_roberta_qualified=false`. Live ROBERTA quality claims require a separate live-eligible corpus, HTTP execution, and evidence-aware grading.
