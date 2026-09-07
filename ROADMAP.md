@@ -305,6 +305,8 @@ Current LAB #21 implementation:
 - read-only evaluation telemetry contract for evidence, canonical claims, provenance, freshness, and execution boundary;
 - `EVIDENCE_REQUIRED` when telemetry is absent instead of guessed PASS/FAIL;
 - claim-to-evidence path validation when telemetry is present;
+- accepted `roberta_claim_integrity/v1` PASS required for bounded live PASS;
+- bounded evidence-contract qualification kept separate from provider-truth/full-natural-language certification;
 - deterministic CI validates the live plan and Laboratory logic without provider keys.
 
 Acceptance completes when the LAB #21 PR is green and merged; live ROBERTA qualification additionally depends on ROBERTA exposing the read-only telemetry contract.
