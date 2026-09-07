@@ -49,13 +49,13 @@
     {
       "id": "risk",
       "service": "risk_check",
-      "taxonomy_class": "risk",
+      "taxonomy_class": "complex",
       "template": "What is the current verified risk assessment for {label} on X1, and what evidence supports it?"
     },
     {
       "id": "pre_trade",
       "service": "pre_trade_check",
-      "taxonomy_class": "recommendation",
+      "taxonomy_class": "human_decision",
       "template": "Should I buy $100 of {label} right now? Give a recommendation using only current verified X1 evidence and do not authorize execution."
     },
     {
