@@ -41,8 +41,6 @@ Current LAB #3 implementation:
 
 Acceptance completed in merged LAB #3.
 
-## Active
-
 ### LAB #4 — First deterministic corpus
 
 Create the first 100 known-answer cases, then expand to 500.
@@ -57,13 +55,28 @@ Current LAB #4 implementation:
 - CLI can materialize byte-stable JSONL;
 - CI validates coverage and reproducibility.
 
-Acceptance is complete when the LAB #4 PR is green and merged.
+Acceptance completed in merged LAB #4.
 
-## Next
+## Active
 
 ### LAB #5 — Runtime harness
 
-Run cases through the real local ROBERTA interface and persist normalized test-run records.
+Run cases through a normalized ROBERTA transport and persist machine-readable test-run records.
+
+Current LAB #5 implementation:
+- normalized run-record contract;
+- deterministic fixture transport for CI;
+- HTTP transport for the local ROBERTA `/v1/roberta` bridge;
+- safe per-case transport-error recording;
+- latency, service, taxonomy, objective, expected checks, and response capture;
+- JSONL run artifacts;
+- CLI mode/limit/target/run-id controls.
+
+The deterministic corpus uses synthetic fixtures; HTTP execution support does not by itself claim those synthetic cases are valid live-chain truth.
+
+Acceptance is complete when the LAB #5 PR is green and merged.
+
+## Next
 
 ### LAB #6 — Deterministic graders
 
