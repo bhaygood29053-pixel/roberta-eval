@@ -39,6 +39,7 @@ src/roberta_eval/
   adversarial.py  invariant-targeted adversarial suite generation
   conversation.py multi-turn generation, execution, and fact-consistency grading
   classifier.py   stable failure categories and severity normalization
+  root_cause.py   conservative layer localization from explicit snapshots
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -110,3 +111,7 @@ The current public HTTP adapter posts individual messages and does not expose an
 ## Failure-classification boundary
 
 A failure classifier labels observed grader/runtime findings; it does not create facts. Missing structured evidence is classified as evaluation incompleteness rather than silently promoted into a ROBERTA defect.
+
+## Root-cause localization boundary
+
+Localization is evidence-driven. Without a sufficient layer snapshot, product defects remain `unknown`; the Laboratory does not infer a failing component merely from the shape of an answer.

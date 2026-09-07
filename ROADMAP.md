@@ -160,8 +160,6 @@ Current LAB #11 implementation:
 
 Acceptance completed in merged LAB #11.
 
-## Active
-
 ### LAB #12 — Failure Classification v1
 Map grader/runtime/conversation findings into stable defect categories and severities.
 
@@ -173,12 +171,25 @@ Current LAB #12 implementation:
 - source grader/reason/case/service provenance retained;
 - CLI/CI classification.
 
-Acceptance is complete when the LAB #12 PR is green and merged.
+Acceptance completed in merged LAB #12.
 
-## Next
+## Active
 
 ### LAB #13 — Root Cause Localization v1
-Use available layer snapshots to identify the most likely failing component without guessing when snapshots are absent.
+Use available layer snapshots to identify the first proven incorrect component without guessing when evidence is absent.
+
+Current LAB #13 implementation:
+- provider/CMIS/X1 Scout/ROBERTA/laboratory/runtime-transport/unknown layers;
+- explicit layer-snapshot states;
+- first-proven-incorrect-layer rules;
+- missing or inconclusive layer evidence returns UNKNOWN;
+- evaluation-incomplete findings remain Laboratory-side;
+- execution-boundary violations can localize to the observed ROBERTA response boundary;
+- CLI/CI localization.
+
+Acceptance is complete when the LAB #13 PR is green and merged.
+
+## Next
 
 ### LAB #14 — Failure Clustering v1
 Collapse recurring failures into actionable defect clusters.

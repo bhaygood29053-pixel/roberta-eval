@@ -58,3 +58,6 @@ jobs:
 
       - name: Failure classification smoke
         run: roberta-eval classify --input /tmp/roberta-grades.jsonl --output /tmp/roberta-findings.jsonl
+
+      - name: Root cause localization smoke
+        run: roberta-eval localize --input /tmp/roberta-findings.jsonl --output /tmp/roberta-localizations.jsonl
