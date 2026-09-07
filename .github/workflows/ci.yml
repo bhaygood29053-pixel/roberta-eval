@@ -61,3 +61,6 @@ jobs:
 
       - name: Root cause localization smoke
         run: roberta-eval localize --input /tmp/roberta-findings.jsonl --output /tmp/roberta-localizations.jsonl
+
+      - name: Failure clustering smoke
+        run: roberta-eval cluster --findings /tmp/roberta-findings.jsonl --localizations /tmp/roberta-localizations.jsonl --output /tmp/roberta-clusters.jsonl
