@@ -150,10 +150,10 @@ def select_cases(
     if strategy != "balanced":
         raise ValueError(f"unsupported case selection strategy: {strategy}")
 
-    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
-    group_order: list[tuple[str, str]] = []
+    groups: dict[str, list[dict[str, Any]]] = {}
+    group_order: list[str] = []
     for case in cases:
-        key = (str(case.get("service", "")), str(case.get("taxonomy_class", "")))
+        key = str(case.get("service", ""))
         if key not in groups:
             groups[key] = []
             group_order.append(key)
