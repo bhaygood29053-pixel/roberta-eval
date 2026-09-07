@@ -46,6 +46,7 @@ src/roberta_eval/
   dashboard.py    presentation-only evaluation view model and Markdown
   github_promotion.py review-gated GitHub defect proposals
   release_qualification.py evidence-aware release gates
+  scale.py        10k/25k deterministic scale generation and qualification
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -57,6 +58,7 @@ config/
   regression_memory.json permanent confirmed regression cases
   trend_history.json versioned longitudinal evaluation snapshots
   release_policy.json deterministic blocking and advisory warning policy
+  scale_surfaces.json 500 controlled scale surfaces per reviewed blueprint
 
 future/
   generators/     question/scenario generation
@@ -148,3 +150,7 @@ The Laboratory produces reviewable issue proposals only from explicitly confirme
 ## Release-qualification boundary
 
 Deterministic failures, critical findings, failed regression replays, and deterministic regressions may block qualification. Advisory human-quality metrics can warn but cannot override a deterministic block. Live release qualification requires live-qualified evidence.
+
+## Scale-suite boundary
+
+The 10,000-case and 25,000-case gates qualify Laboratory scale behavior over synthetic fixture evidence. They preserve the reviewed blueprint answer keys and carry `live_roberta_qualified=false`; scale alone does not convert fixture evidence into live ROBERTA proof.
