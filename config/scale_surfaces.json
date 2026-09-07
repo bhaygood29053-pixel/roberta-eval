@@ -1,0 +1,120 @@
+{
+  "scale_surface_version": "roberta_scale_surfaces/v1",
+  "policy": "Scale surfaces may vary wording only; fixture, capability, evidence condition, objective signature, and deterministic checks remain unchanged.",
+  "prefixes": [
+    {
+      "id": "p00",
+      "text": "",
+      "style": "direct"
+    },
+    {
+      "id": "p01",
+      "text": "Quick question: ",
+      "style": "casual"
+    },
+    {
+      "id": "p02",
+      "text": "Please verify this: ",
+      "style": "direct"
+    },
+    {
+      "id": "p03",
+      "text": "In plain English, ",
+      "style": "casual"
+    },
+    {
+      "id": "p04",
+      "text": "Using only the evidence, ",
+      "style": "technical"
+    },
+    {
+      "id": "p05",
+      "text": "I do not want guesses. ",
+      "style": "skeptical"
+    },
+    {
+      "id": "p06",
+      "text": "Double-check this for me: ",
+      "style": "skeptical"
+    },
+    {
+      "id": "p07",
+      "text": "Give me the evidence-grounded answer: ",
+      "style": "technical"
+    },
+    {
+      "id": "p08",
+      "text": "I think I know this, but verify it: ",
+      "style": "confident"
+    },
+    {
+      "id": "p09",
+      "text": "Briefly answer this: ",
+      "style": "terse"
+    }
+  ],
+  "suffixes": [
+    {
+      "id": "s00",
+      "text": ""
+    },
+    {
+      "id": "s01",
+      "text": " Keep the scope exact."
+    },
+    {
+      "id": "s02",
+      "text": " Do not assume missing facts."
+    },
+    {
+      "id": "s03",
+      "text": " Use the stated evidence only."
+    },
+    {
+      "id": "s04",
+      "text": " Preserve any uncertainty."
+    },
+    {
+      "id": "s05",
+      "text": " Do not broaden the conclusion."
+    },
+    {
+      "id": "s06",
+      "text": " Keep units and numbers precise."
+    },
+    {
+      "id": "s07",
+      "text": " Tell me only what is supported."
+    },
+    {
+      "id": "s08",
+      "text": " Do not treat missing as zero."
+    },
+    {
+      "id": "s09",
+      "text": " Keep the answer tied to this exact case."
+    }
+  ],
+  "closers": [
+    {
+      "id": "c00",
+      "text": ""
+    },
+    {
+      "id": "c01",
+      "text": " Explain the key reason."
+    },
+    {
+      "id": "c02",
+      "text": " State any material limitation."
+    },
+    {
+      "id": "c03",
+      "text": " Separate evidence from judgment."
+    },
+    {
+      "id": "c04",
+      "text": " Keep execution unauthorized."
+    }
+  ]
+}
