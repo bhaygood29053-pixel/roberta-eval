@@ -94,7 +94,11 @@ def test_live_grader_passes_claims_that_match_evidence() -> None:
                     "asset": {
                         "symbol": "XNT",
                         "mint": "verified-mint",
-                    }
+                    },
+                    "claim_integrity": {
+                        "contract_version": "roberta_claim_integrity/v1",
+                        "status": "PASS",
+                    },
                 },
                 "claims": [
                     {
@@ -115,6 +119,33 @@ def test_live_grader_passes_claims_that_match_evidence() -> None:
     assert result["live_roberta_qualified"] is True
 
 
+def test_live_grader_requires_claim_integrity_certificate() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "Structured but not claim-integrity certified.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v1",
+                "evaluation_evidence": {"asset": {"symbol": "XNT"}},
+                "claims": [
+                    {
+                        "name": "asset_symbol",
+                        "evidence_path": "asset.symbol",
+                        "value": "XNT",
+                    }
+                ],
+                "evidence_provenance": {"facts_authority": "chain_scout_cmis"},
+                "evidence_freshness": {"state": "unknown"},
+                "execution_authorized": False,
+            }
+        )
+    )
+
+    assert result["verdict"] == "EVIDENCE_REQUIRED"
+    assert result["reason"] == "claim_integrity_unavailable"
+
+
 def test_live_grader_fails_claim_evidence_mismatch() -> None:
     result = grade_live_record(
         _live_record(
@@ -123,7 +154,13 @@ def test_live_grader_fails_claim_evidence_mismatch() -> None:
                 "status": "ok",
                 "reply": "Mismatch example.",
                 "evaluation_telemetry_version": "roberta_evaluation_telemetry/v1",
-                "evaluation_evidence": {"asset": {"symbol": "XNT"}},
+                "evaluation_evidence": {
+                    "asset": {"symbol": "XNT"},
+                    "claim_integrity": {
+                        "contract_version": "roberta_claim_integrity/v1",
+                        "status": "PASS",
+                    },
+                },
                 "claims": [
                     {
                         "name": "asset_symbol",
