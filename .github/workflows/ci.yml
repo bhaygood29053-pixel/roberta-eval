@@ -41,6 +41,9 @@ jobs:
       - name: Live evaluation plan
         run: roberta-eval live-plan --limit 20 --write /tmp/roberta-live-plan.jsonl
 
+      - name: Live qualification diagnostics smoke
+        run: roberta-eval live-diagnose --input config/live_diagnostics_smoke.jsonl --json /tmp/roberta-live-diagnostics.json --markdown /tmp/roberta-live-diagnostics.md
+
       - name: Deterministic grader smoke
         run: roberta-eval grade --limit 20 --output /tmp/roberta-grades.jsonl
 
