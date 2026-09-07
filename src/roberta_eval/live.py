@@ -249,7 +249,10 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
         "reason": "live_evidence_contract_satisfied",
         "checked_claims": checked_claims,
         "telemetry_version": response.get("evaluation_telemetry_version"),
-        "live_roberta_qualified": True,
+        "live_evidence_contract_qualified": True,
+        "live_roberta_qualified": False,
+        "provider_truth_certified": False,
+        "all_natural_language_claims_certified": False,
     }
 
 
@@ -267,9 +270,12 @@ def live_grader_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
             for verdict in ("PASS", "EVIDENCE_REQUIRED", "FAIL")
         },
         "services": sorted({result["service"] for result in results if result.get("service")}),
-        "live_roberta_qualified": bool(results) and all(
+        "live_evidence_contract_qualified": bool(results) and all(
             result["verdict"] == "PASS" for result in results
         ),
+        "live_roberta_qualified": False,
+        "provider_truth_certified": False,
+        "all_natural_language_claims_certified": False,
     }
 
 
