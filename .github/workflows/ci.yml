@@ -43,3 +43,6 @@ jobs:
 
       - name: Generated question suite
         run: roberta-eval generate --write /tmp/roberta-generated-suite.jsonl
+
+      - name: 2500-case pipeline stress qualification
+        run: roberta-eval stress --limit 2500 --json /tmp/stress.json --markdown /tmp/stress.md
