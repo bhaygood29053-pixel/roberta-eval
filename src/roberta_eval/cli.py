@@ -15,6 +15,7 @@ from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .generator import generate_cases, generated_summary, write_generated
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
+from .regression_memory import load_memory, memory_summary, validate_memory
 from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .stress import run_stress_qualification, write_stress_json, write_stress_markdown
@@ -185,6 +186,13 @@ def cluster_suite(findings_path: str, localizations_path: str | None, output: st
     return 0
 
 
+def regression_memory_suite() -> int:
+    memory = load_memory()
+    validate_memory(memory)
+    print(json.dumps(memory_summary(memory), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -226,6 +234,7 @@ def main() -> int:
     cluster_parser.add_argument("--findings", required=True)
     cluster_parser.add_argument("--localizations", default=None)
     cluster_parser.add_argument("--output", default=None)
+    subparsers.add_parser("regressions", help="validate and summarize permanent regression memory")
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -256,6 +265,8 @@ def main() -> int:
         return localize_suite(args.input, args.output)
     if args.command == "cluster":
         return cluster_suite(args.findings, args.localizations, args.output)
+    if args.command == "regressions":
+        return regression_memory_suite()
 
     return 2
 
