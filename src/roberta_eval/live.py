@@ -182,6 +182,24 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(freshness, dict):
         return _missing_telemetry(record, "evidence_freshness_unavailable")
 
+    integrity = evidence.get("claim_integrity")
+    if not isinstance(integrity, dict):
+        return _missing_telemetry(record, "claim_integrity_unavailable")
+    if integrity.get("contract_version") != "roberta_claim_integrity/v1":
+        return _missing_telemetry(record, "claim_integrity_contract_unavailable")
+    if integrity.get("status") != "PASS":
+        return {
+            "live_grader_version": LIVE_GRADE_VERSION,
+            "run_id": record.get("run_id"),
+            "record_id": record.get("record_id"),
+            "case_id": record.get("case_id"),
+            "service": record.get("service"),
+            "verdict": "FAIL",
+            "reason": "claim_integrity_not_pass",
+            "severity": "HIGH",
+            "live_roberta_qualified": False,
+        }
+
     if execution is not False:
         return {
             "live_grader_version": LIVE_GRADE_VERSION,
