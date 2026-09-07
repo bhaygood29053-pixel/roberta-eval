@@ -20,6 +20,7 @@ from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .stress import run_stress_qualification, write_stress_json, write_stress_markdown
 from .taxonomy import load_taxonomy, taxonomy_summary, validate_taxonomy
+from .trends import history_summary, load_history, validate_history
 
 
 def doctor() -> int:
@@ -193,6 +194,13 @@ def regression_memory_suite() -> int:
     return 0
 
 
+def trend_suite() -> int:
+    history = load_history()
+    validate_history(history)
+    print(json.dumps(history_summary(history), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -235,6 +243,7 @@ def main() -> int:
     cluster_parser.add_argument("--localizations", default=None)
     cluster_parser.add_argument("--output", default=None)
     subparsers.add_parser("regressions", help="validate and summarize permanent regression memory")
+    subparsers.add_parser("trends", help="validate and summarize longitudinal trend history")
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -267,6 +276,8 @@ def main() -> int:
         return cluster_suite(args.findings, args.localizations, args.output)
     if args.command == "regressions":
         return regression_memory_suite()
+    if args.command == "trends":
+        return trend_suite()
 
     return 2
 
