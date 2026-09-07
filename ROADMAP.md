@@ -315,6 +315,25 @@ The required ROBERTA read-only telemetry dependency is also accepted through pub
 
 LAB #21 is therefore ready for bounded local live runs after the local ROBERTA/Laboratory runtimes are synchronized. Full provider-truth or all-natural-language answer certification remains explicitly unclaimed.
 
+
+### LAB #22 — Live Qualification Diagnostics v1
+
+Turn LAB #21 live grades into a deterministic service-by-service remediation map without confusing missing evidence with a factual ROBERTA failure.
+
+Current LAB #22 implementation candidate:
+- consumes only `roberta_live_evidence_grader/v1` JSONL;
+- reports PASS / EVIDENCE_REQUIRED / FAIL by service and reason;
+- separates runtime failures, telemetry gaps, canonical-claim gaps, evidence-metadata gaps, protected Claim Integrity gaps, claim/evidence mismatches, and execution violations;
+- assigns deterministic likely owner repository/component and P0/P1/P2 remediation priority;
+- preserves EVIDENCE_REQUIRED as qualification-blocking but not a factual product failure;
+- unknown diagnostic reasons remain Laboratory-owned until explicitly mapped;
+- JSON + Markdown reports;
+- CLI and deterministic CI smoke;
+- no provider-truth or all-natural-language certification.
+
+Acceptance is pending the LAB #22 PR/CI merge gate.
+
+
 ## Quality rule
 
 Scale is not success by itself. A smaller suite with trustworthy expectations is more valuable than thousands of poorly specified questions.
