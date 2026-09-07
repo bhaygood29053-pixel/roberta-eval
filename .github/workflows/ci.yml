@@ -40,3 +40,6 @@ jobs:
 
       - name: Deterministic grader smoke
         run: roberta-eval grade --limit 20 --output /tmp/roberta-grades.jsonl
+
+      - name: Generated question suite
+        run: roberta-eval generate --write /tmp/roberta-generated-suite.jsonl
