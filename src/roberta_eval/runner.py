@@ -125,7 +125,7 @@ def execute_case(
         "question": case["question"],
         "target": target,
         "transport": transport.name,
-        "case_data_mode": "synthetic_fixture",
+        "case_data_mode": case.get("case_data_mode", "synthetic_fixture"),
         "started_at": _iso(started_at),
         "finished_at": _iso(finished_at),
         "latency_ms": round(elapsed_ms, 3),
@@ -136,6 +136,46 @@ def execute_case(
     }
 
 
+def select_cases(
+    cases: list[dict[str, Any]],
+    *,
+    limit: int | None = None,
+    strategy: str = "sequential",
+) -> list[dict[str, Any]]:
+    if limit is None:
+        return list(cases)
+    count = max(0, limit)
+    if strategy == "sequential":
+        return list(cases[:count])
+    if strategy != "balanced":
+        raise ValueError(f"unsupported case selection strategy: {strategy}")
+
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    group_order: list[tuple[str, str]] = []
+    for case in cases:
+        key = (str(case.get("service", "")), str(case.get("taxonomy_class", "")))
+        if key not in groups:
+            groups[key] = []
+            group_order.append(key)
+        groups[key].append(case)
+
+    selected: list[dict[str, Any]] = []
+    offset = 0
+    while len(selected) < count:
+        added = False
+        for key in group_order:
+            bucket = groups[key]
+            if offset < len(bucket):
+                selected.append(bucket[offset])
+                added = True
+                if len(selected) >= count:
+                    break
+        if not added:
+            break
+        offset += 1
+    return selected
+
+
 def run_cases(
     cases: list[dict[str, Any]],
     *,
@@ -143,8 +183,9 @@ def run_cases(
     run_id: str,
     target: str,
     limit: int | None = None,
+    selection: str = "sequential",
 ) -> list[dict[str, Any]]:
-    selected = cases if limit is None else cases[: max(0, limit)]
+    selected = select_cases(cases, limit=limit, strategy=selection)
     return [
         execute_case(case, transport=transport, run_id=run_id, target=target)
         for case in selected
