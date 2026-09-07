@@ -216,8 +216,6 @@ Current LAB #15 implementation:
 
 Acceptance completed in merged LAB #15.
 
-## Active
-
 ### LAB #16 — Trend Intelligence v1
 Compare evaluation runs/releases using normalized deterministic and advisory metrics.
 
@@ -231,12 +229,25 @@ Current LAB #16 implementation:
 - incompatible scope rejection and idempotent history append;
 - fixture-pipeline vs live-ROBERTA scope preserved.
 
-Acceptance is complete when the LAB #16 PR is green and merged.
+Acceptance completed in merged LAB #16.
 
-## Next
+## Active
 
 ### LAB #17 — Evaluation Dashboard v1
-Render compact human-readable quality and trend dashboards.
+Render compact human-readable quality dashboards directly from machine-authoritative Laboratory records.
+
+Current LAB #17 implementation:
+- stable dashboard view model;
+- deterministic PASS/WARN/FAIL and coverage;
+- advisory human-quality section explicitly non-authoritative;
+- failure-cluster and regression-memory counts;
+- trend-history/current-direction fields;
+- qualification scope and live-vs-fixture boundary;
+- Markdown/JSON output and CI rendering.
+
+Acceptance is complete when the LAB #17 PR is green and merged.
+
+## Next
 
 ### LAB #18 — GitHub Defect Promotion v1
 Generate reviewable GitHub issue proposals from accepted failure clusters.
