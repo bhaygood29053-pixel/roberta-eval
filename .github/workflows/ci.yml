@@ -76,3 +76,6 @@ jobs:
 
       - name: GitHub defect proposal smoke
         run: roberta-eval defect-proposals --clusters /tmp/roberta-clusters.jsonl --output /tmp/roberta-defect-proposals.jsonl
+
+      - name: Release qualification
+        run: roberta-eval release-qualify --scope fixture_pipeline --output /tmp/roberta-release-qualification.json
