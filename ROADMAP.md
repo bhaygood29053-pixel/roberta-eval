@@ -146,8 +146,6 @@ Current LAB #10 implementation:
 
 Acceptance completed in merged LAB #10.
 
-## Active
-
 ### LAB #11 — Multi-turn Consistency v1
 Test fact stability, follow-up consistency, pressure resistance, and execution boundaries across no-new-evidence conversations.
 
@@ -160,12 +158,24 @@ Current LAB #11 implementation:
 - missing structured conversation evidence is WARN;
 - live HTTP session persistence remains explicitly unqualified until ROBERTA exposes a session/conversation contract.
 
-Acceptance is complete when the LAB #11 PR is green and merged.
+Acceptance completed in merged LAB #11.
 
-## Next
+## Active
 
 ### LAB #12 — Failure Classification v1
-Map grader/runtime findings into stable defect categories and severities.
+Map grader/runtime/conversation findings into stable defect categories and severities.
+
+Current LAB #12 implementation:
+- runtime, factual, numerical, freshness, unsupported-conclusion, execution, contradiction, evaluation-incomplete, and evaluation-error categories;
+- deterministic severity normalization;
+- text-only/missing structure remains evaluation incomplete instead of becoming a ROBERTA defect;
+- conversation fact drift maps to contradiction;
+- source grader/reason/case/service provenance retained;
+- CLI/CI classification.
+
+Acceptance is complete when the LAB #12 PR is green and merged.
+
+## Next
 
 ### LAB #13 — Root Cause Localization v1
 Use available layer snapshots to identify the most likely failing component without guessing when snapshots are absent.

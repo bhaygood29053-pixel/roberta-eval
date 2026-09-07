@@ -9,6 +9,7 @@ from .adversarial import adversarial_summary, generate_adversarial_cases, write_
 from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
 from .conversation import conversation_summary, consistency_summary, generate_conversations, grade_conversation_runs, run_conversations, write_conversations
+from .classifier import classification_summary, classify_results, load_jsonl as load_classification_jsonl, write_findings
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .generator import generate_cases, generated_summary, write_generated
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
@@ -154,6 +155,15 @@ def conversation_suite(output: str | None) -> int:
     return 0 if payload["consistency"]["verdict_counts"]["FAIL"] == 0 else 1
 
 
+def classify_suite(input_path: str, output: str | None) -> int:
+    grade_results = load_classification_jsonl(Path(input_path))
+    findings = classify_results(grade_results)
+    if output:
+        write_findings(Path(output), findings)
+    print(json.dumps(classification_summary(findings), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -185,6 +195,9 @@ def main() -> int:
     adversarial_parser.add_argument("--write", dest="output", default=None)
     conversation_parser = subparsers.add_parser("conversations", help="run fixture multi-turn consistency suite")
     conversation_parser.add_argument("--write", dest="output", default=None)
+    classify_parser = subparsers.add_parser("classify", help="classify deterministic grader findings")
+    classify_parser.add_argument("--input", required=True)
+    classify_parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -209,6 +222,8 @@ def main() -> int:
         return adversarial_suite(args.output)
     if args.command == "conversations":
         return conversation_suite(args.output)
+    if args.command == "classify":
+        return classify_suite(args.input, args.output)
 
     return 2
 
