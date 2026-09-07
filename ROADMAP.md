@@ -14,7 +14,7 @@ Acceptance:
 - CI exists;
 - Laboratory contract, architecture, and roadmap exist.
 
-## Active
+## Completed
 
 ### LAB #2 — Capability Registry v1
 
@@ -28,13 +28,24 @@ Current LAB #2 implementation:
 - deterministic validation rejects parity drift, duplicate IDs, unsafe execution authorization, and invalid workflow mappings;
 - CLI and CI validate the registry.
 
-Acceptance is complete when the LAB #2 PR is green and merged.
+Acceptance completed in merged LAB #2.
 
-## Next
+## Active
 
 ### LAB #3 — Question Taxonomy v1
 
-Define basic, complex, ambiguous, adversarial, missing-data, stale-data, numerical, comparison, follow-up, multi-turn, and unsupported-question classes.
+Define machine-readable question classes and separate evidence, user-style, and conversation-shape dimensions.
+
+Current LAB #3 implementation:
+- 15 test classes including all required basic/complex/numerical/comparison/ambiguous/adversarial/false-premise/missing-data/stale-data/unsupported/follow-up/multi-turn classes;
+- separate evidence-condition, user-style, and conversation-shape dimensions;
+- objective-preservation rule for generated wording variants;
+- strict capability-reference and conversation-shape validation;
+- CLI and CI taxonomy validation.
+
+Acceptance is complete when the LAB #3 PR is green and merged.
+
+## Next
 
 ### LAB #4 — First deterministic corpus
 
