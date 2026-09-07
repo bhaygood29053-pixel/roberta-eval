@@ -34,3 +34,6 @@ jobs:
 
       - name: Deterministic corpus
         run: roberta-eval corpus --write /tmp/roberta-deterministic-corpus.jsonl
+
+      - name: Runtime harness smoke
+        run: roberta-eval run --mode fixture --limit 5 --run-id ci-smoke --output /tmp/roberta-run.jsonl
