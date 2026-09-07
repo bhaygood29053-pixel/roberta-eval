@@ -79,3 +79,9 @@ jobs:
 
       - name: Release qualification
         run: roberta-eval release-qualify --scope fixture_pipeline --output /tmp/roberta-release-qualification.json
+
+      - name: 10000-case scale qualification
+        run: roberta-eval scale --limit 10000 --output /tmp/roberta-scale-10000.json
+
+      - name: 25000-case scale qualification
+        run: roberta-eval scale --limit 25000 --output /tmp/roberta-scale-25000.json
