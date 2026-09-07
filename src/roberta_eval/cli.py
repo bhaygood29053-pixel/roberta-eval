@@ -15,7 +15,7 @@ from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .dashboard import build_dashboard, write_dashboard_json, write_dashboard_markdown
 from .generator import generate_cases, generated_summary, write_generated
 from .github_promotion import build_issue_proposals, load_jsonl as load_proposal_jsonl, proposal_summary, write_proposals
-from .live import grade_live_records, live_case_summary, live_grader_summary, materialize_live_cases, write_live_cases, write_live_grades
+from .live import LIVE_TELEMETRY_VERSION, grade_live_records, live_case_summary, live_grader_summary, materialize_live_cases, write_live_cases, write_live_grades
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
 from .regression_memory import load_memory, memory_summary, validate_memory
@@ -127,7 +127,10 @@ def live_run_suite(
     )
     records = run_cases(
         cases,
-        transport=HttpRobertaTransport(selected_target),
+        transport=HttpRobertaTransport(
+            selected_target,
+            evaluation_mode=LIVE_TELEMETRY_VERSION,
+        ),
         run_id=run_id,
         target=selected_target,
     )
