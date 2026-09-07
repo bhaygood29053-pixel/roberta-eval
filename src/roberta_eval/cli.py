@@ -16,6 +16,7 @@ from .dashboard import build_dashboard, write_dashboard_json, write_dashboard_ma
 from .generator import generate_cases, generated_summary, write_generated
 from .github_promotion import build_issue_proposals, load_jsonl as load_proposal_jsonl, proposal_summary, write_proposals
 from .live import LIVE_TELEMETRY_VERSION, grade_live_records, live_case_summary, live_grader_summary, materialize_live_cases, write_live_cases, write_live_grades
+from .live_diagnostics import diagnose_live_grades, load_live_grades, write_diagnostics_json, write_diagnostics_markdown
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .root_cause import localization_summary, localize_findings, load_jsonl as load_localization_jsonl, write_localizations
 from .regression_memory import load_memory, memory_summary, validate_memory
@@ -151,6 +152,17 @@ def live_grade_suite(input_path: str, output: str | None) -> int:
     summary = live_grader_summary(results)
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 1 if summary["verdict_counts"]["FAIL"] else 0
+
+
+def live_diagnose_suite(input_path: str, json_output: str | None, markdown_output: str | None) -> int:
+    results = load_live_grades(Path(input_path))
+    report = diagnose_live_grades(results)
+    if json_output:
+        write_diagnostics_json(Path(json_output), report)
+    if markdown_output:
+        write_diagnostics_markdown(Path(markdown_output), report)
+    print(json.dumps(report, indent=2, sort_keys=True))
+    return 1 if report["actual_live_failures_present"] else 0
 
 
 def grade_suite(input_path: str | None, output: str | None, limit: int | None) -> int:
@@ -335,6 +347,10 @@ def main() -> int:
     live_grade_parser = subparsers.add_parser("live-grade", help="grade live ROBERTA run records against captured evidence telemetry")
     live_grade_parser.add_argument("--input", required=True)
     live_grade_parser.add_argument("--output", default=None)
+    live_diagnose_parser = subparsers.add_parser("live-diagnose", help="turn LAB #21 live grades into a deterministic remediation map")
+    live_diagnose_parser.add_argument("--input", required=True)
+    live_diagnose_parser.add_argument("--json", dest="json_output", default=None)
+    live_diagnose_parser.add_argument("--markdown", dest="markdown_output", default=None)
     grade_parser = subparsers.add_parser("grade", help="grade normalized run records")
     grade_parser.add_argument("--input", default=None)
     grade_parser.add_argument("--output", default=None)
@@ -395,6 +411,8 @@ def main() -> int:
         return live_run_suite(args.limit, args.output, args.target, args.run_id)
     if args.command == "live-grade":
         return live_grade_suite(args.input, args.output)
+    if args.command == "live-diagnose":
+        return live_diagnose_suite(args.input, args.json_output, args.markdown_output)
     if args.command == "grade":
         return grade_suite(args.input, args.output, args.limit)
     if args.command == "generate":
