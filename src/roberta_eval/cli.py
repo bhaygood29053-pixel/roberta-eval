@@ -9,6 +9,7 @@ from .config import default_config_path, load_config, validate_config
 from .corpus import corpus_summary, materialize_cases, write_corpus
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .generator import generate_cases, generated_summary, write_generated
+from .quality import grade_human_quality_records, human_quality_summary, write_quality
 from .registry import load_registry, registry_summary, validate_registry
 from .runner import FixtureRobertaTransport, HttpRobertaTransport, run_cases, run_summary, write_run
 from .stress import run_stress_qualification, write_stress_json, write_stress_markdown
@@ -119,6 +120,15 @@ def stress_suite(limit: int, json_output: str | None, markdown_output: str | Non
     return 0 if report["accepted"] else 1
 
 
+def quality_suite(input_path: str, output: str | None) -> int:
+    records = load_run_jsonl(Path(input_path))
+    results = grade_human_quality_records(records)
+    if output:
+        write_quality(Path(output), results)
+    print(json.dumps(human_quality_summary(results), indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="roberta-eval")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -143,6 +153,9 @@ def main() -> int:
     stress_parser.add_argument("--limit", type=int, default=2500)
     stress_parser.add_argument("--json", dest="json_output", default=None)
     stress_parser.add_argument("--markdown", dest="markdown_output", default=None)
+    quality_parser = subparsers.add_parser("quality", help="advisory human-response quality grading")
+    quality_parser.add_argument("--input", required=True)
+    quality_parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
     if args.command == "doctor":
@@ -161,6 +174,8 @@ def main() -> int:
         return generate_suite(args.output)
     if args.command == "stress":
         return stress_suite(args.limit, args.json_output, args.markdown_output)
+    if args.command == "quality":
+        return quality_suite(args.input, args.output)
 
     return 2
 
