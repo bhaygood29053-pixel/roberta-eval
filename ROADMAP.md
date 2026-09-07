@@ -120,8 +120,6 @@ Current LAB #8 implementation:
 
 Acceptance completed in merged LAB #8 with the fixture pipeline gate green.
 
-## Active
-
 ### LAB #9 — Human & Semantic Quality Grading v1
 
 Add advisory scoring for human-facing response quality without granting subjective graders factual authority.
@@ -132,12 +130,25 @@ Current LAB #9 implementation:
 - explicit `advisory_only=true` and `factual_authority=false`;
 - CLI/CI support over normalized run records.
 
-Acceptance is complete when the LAB #9 PR is green and merged.
+Acceptance completed in merged LAB #9.
 
-## Next
+## Active
 
 ### LAB #10 — Adversarial Suite v1
-Add systematic invariant attacks and false-premise pressure cases.
+Add systematic invariant attacks while preserving the underlying known-answer objective.
+
+Current LAB #10 implementation:
+- 8 attack families;
+- 432 adversarial cases across all 18 services;
+- explicit target invariant per attack;
+- original fixture/objective/checks preserved;
+- attack-specific forbidden conclusion added;
+- stable IDs and digest;
+- CLI/CI generation.
+
+Acceptance is complete when the LAB #10 PR is green and merged.
+
+## Next
 
 ### LAB #11 — Multi-turn Consistency v1
 Test context retention, contradiction, correction, and evidence evolution across conversations.
