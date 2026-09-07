@@ -41,6 +41,7 @@ src/roberta_eval/
   classifier.py   stable failure categories and severity normalization
   root_cause.py   conservative layer localization from explicit snapshots
   clustering.py   stable recurring-defect clustering
+  regression_memory.py confirmed replayable defect memory
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -49,6 +50,7 @@ config/
   generation_surfaces.json deterministic high-volume wording surfaces
   adversarial_attacks.json named invariant-attack wrappers
   conversation_patterns.json multi-turn no-new-evidence patterns
+  regression_memory.json permanent confirmed regression cases
 
 future/
   generators/     question/scenario generation
@@ -120,3 +122,7 @@ Localization is evidence-driven. Without a sufficient layer snapshot, product de
 ## Failure-clustering boundary
 
 Clusters represent repeated manifestations of the same classified defect identity. The Laboratory does not cluster solely on wording similarity, and evaluation-incomplete findings remain separate from actionable product defects.
+
+## Regression-memory boundary
+
+Permanent regression memory is confirmation-gated. Evaluation-system failures, unconfirmed clusters, and non-replayable cases are not silently promoted into product regressions.
