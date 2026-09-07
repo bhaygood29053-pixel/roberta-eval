@@ -865,7 +865,7 @@
     {
       "id": "discovery_intelligence.new_activity",
       "service": "discovery_intelligence",
-      "taxonomy_class": "numerical",
+      "taxonomy_class": "basic",
       "evidence_condition": "fixture_verified",
       "question": "how many new LABX activity observations are in this fixture?",
       "fixture": {
