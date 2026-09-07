@@ -42,6 +42,7 @@ src/roberta_eval/
   root_cause.py   conservative layer localization from explicit snapshots
   clustering.py   stable recurring-defect clustering
   regression_memory.py confirmed replayable defect memory
+  trends.py       normalized longitudinal quality comparisons
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -51,6 +52,7 @@ config/
   adversarial_attacks.json named invariant-attack wrappers
   conversation_patterns.json multi-turn no-new-evidence patterns
   regression_memory.json permanent confirmed regression cases
+  trend_history.json versioned longitudinal evaluation snapshots
 
 future/
   generators/     question/scenario generation
@@ -126,3 +128,7 @@ Clusters represent repeated manifestations of the same classified defect identit
 ## Regression-memory boundary
 
 Permanent regression memory is confirmation-gated. Evaluation-system failures, unconfirmed clusters, and non-replayable cases are not silently promoted into product regressions.
+
+## Trend-intelligence boundary
+
+Deterministic correctness trends and advisory human-quality trends are separate. Fixture-pipeline history cannot be relabeled as live ROBERTA quality history, and advisory improvement cannot erase deterministic regression.
