@@ -31,3 +31,6 @@ jobs:
 
       - name: Question taxonomy
         run: roberta-eval taxonomy
+
+      - name: Deterministic corpus
+        run: roberta-eval corpus --write /tmp/roberta-deterministic-corpus.jsonl
