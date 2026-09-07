@@ -86,12 +86,15 @@ def validate_taxonomy(taxonomy: dict[str, Any], registry: dict[str, Any] | None 
             raise ValueError(f"{class_id}: max_turns violates conversation shape")
 
         applies_to = item.get("applies_to")
-        if applies_to not in {"all", "none"}:
-            if not isinstance(applies_to, list) or not applies_to:
-                raise ValueError(f"{class_id}: applies_to must be all, none, or services")
+        if isinstance(applies_to, str):
+            if applies_to not in {"all", "none"}:
+                raise ValueError(f"{class_id}: applies_to string must be all or none")
+        elif isinstance(applies_to, list) and applies_to:
             unknown = set(applies_to) - service_ids
             if unknown:
                 raise ValueError(f"{class_id}: unknown services {sorted(unknown)}")
+        else:
+            raise ValueError(f"{class_id}: applies_to must be all, none, or services")
 
         conditions = item.get("evidence_conditions")
         if not isinstance(conditions, list) or not conditions:
