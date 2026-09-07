@@ -47,6 +47,7 @@ src/roberta_eval/
   github_promotion.py review-gated GitHub defect proposals
   release_qualification.py evidence-aware release gates
   scale.py        10k/25k deterministic scale generation and qualification
+  live.py         real-subject live evaluation cases and evidence-bound grading
 
 config/
   capabilities.json       ROBERTA capability inventory
@@ -59,6 +60,7 @@ config/
   trend_history.json versioned longitudinal evaluation snapshots
   release_policy.json deterministic blocking and advisory warning policy
   scale_surfaces.json 500 controlled scale surfaces per reviewed blueprint
+  live_subjects.json real X1 subjects and balanced live question families
 
 future/
   generators/     question/scenario generation
@@ -154,3 +156,16 @@ Deterministic failures, critical findings, failed regression replays, and determ
 ## Scale-suite boundary
 
 The 10,000-case and 25,000-case gates qualify Laboratory scale behavior over synthetic fixture evidence. They preserve the reviewed blueprint answer keys and carry `live_roberta_qualified=false`; scale alone does not convert fixture evidence into live ROBERTA proof.
+
+
+## Live evidence-backed evaluation boundary
+
+LAB #21 creates a separate `live_evidence` case mode. Live cases contain real X1 subjects and questions but no synthetic answer key. A live run can become factually gradable only when ROBERTA returns read-only evaluation telemetry with:
+
+- `evaluation_telemetry_version=roberta_evaluation_telemetry/v1`;
+- `evaluation_evidence` containing the structured evidence used for the answer;
+- canonical `claims` whose values point back to `evidence_path` entries in that evidence;
+- evidence provenance and freshness metadata;
+- `execution_authorized=false`.
+
+The live grader checks canonical claim values directly against the captured evidence object. Missing telemetry becomes `EVIDENCE_REQUIRED`; a mismatch becomes FAIL. The Laboratory never teaches ROBERTA fake fixture identities or rewrites production behavior to satisfy a test.
