@@ -46,3 +46,6 @@ jobs:
 
       - name: 2500-case pipeline stress qualification
         run: roberta-eval stress --limit 2500 --json /tmp/stress.json --markdown /tmp/stress.md
+
+      - name: Human quality advisory smoke
+        run: roberta-eval quality --input /tmp/roberta-run.jsonl --output /tmp/roberta-quality.jsonl
