@@ -1,0 +1,593 @@
+{
+  "registry_version": "roberta_capability_registry/v1",
+  "generated_from": {
+    "repository": "bhaygood29053-pixel/roberta-langgraph",
+    "ref": "main",
+    "observed_commit": "b1dde19f4fcded38bc1d38c45bd2bfeeb18fdf74",
+    "source_files": [
+      "src/roberta/cmis/contracts.py",
+      "src/roberta/x1_scout/state.py",
+      "tests/test_human_response_renderer_v1.py"
+    ]
+  },
+  "semantics": {
+    "contract_exposed": "The service appears in the current ROBERTA-side CMIS contract. This does not assert that every live provider or evidence gate is currently healthy.",
+    "human_renderer_supported": "The Human Response v1 renderer explicitly accepts the workflow family.",
+    "current_claim_rule": "Current facts require freshness support. Missing or unverified freshness cannot be rewritten as current truth.",
+    "scope_rule": "Bounded evidence must remain bounded in ROBERTA conclusions."
+  },
+  "cmis_services": [
+    {
+      "id": "asset_lookup",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "identity",
+        "asset_resolution"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "market_report",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "price",
+        "liquidity",
+        "volume",
+        "market_state"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "rank",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "ranking",
+        "relative_position"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "historical_compare",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "evidence_scoped",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "historical_change",
+        "trend",
+        "period_comparison"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "tokenomics",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "supply",
+        "mint_authority",
+        "freeze_authority",
+        "token_controls"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "burn_intelligence",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "burns",
+        "burn_totals",
+        "burn_history"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "discovery_intelligence",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "discovery",
+        "first_observation",
+        "new_activity"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "risk_check",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "risk",
+        "safety"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states",
+        "categorical risk only when CMIS returns a non-null risk result"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "pre_trade_check",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "pre_trade",
+        "trade_size",
+        "slippage_risk",
+        "decision_support"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states",
+        "categorical risk only when CMIS returns a non-null risk result"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope",
+        "claim that a trade was executed or authorized"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "verification_evidence",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "evidence_scoped",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "evidence",
+        "provenance",
+        "proof"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "concentration_change_intelligence",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "bounded_scope_must_be_preserved",
+      "question_families": [
+        "holder_concentration",
+        "concentration_change"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "concentration_warning_intelligence",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "bounded_scope_must_be_preserved",
+      "question_families": [
+        "holder_concentration",
+        "warning_thresholds"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "bridge_to_xdex_utilization",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "bounded_scope_must_be_preserved",
+      "question_families": [
+        "bridge",
+        "xdex",
+        "utilization"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope",
+        "equate verified XDEX program-family scope with every X1 DEX",
+        "equate bridge activity with adoption",
+        "equate liquidity with volume",
+        "infer causation from utilization alone"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "cross_chain_asset_provenance",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "evidence_scoped",
+      "scope_policy": "bounded_scope_must_be_preserved",
+      "question_families": [
+        "cross_chain",
+        "asset_provenance",
+        "bridge_identity"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "trade_price_impact_intelligence",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "bounded_scope_must_be_preserved",
+      "question_families": [
+        "large_trade",
+        "price_impact",
+        "trade_sequence"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "large_trade_discovery",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "bounded_scope_must_be_preserved",
+      "question_families": [
+        "large_trade",
+        "wallet_activity",
+        "trade_discovery"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope",
+        "identify a wallet owner without evidence",
+        "claim causation from temporal proximity alone"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "regulatory_evidence",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": false,
+      "evidence_authority": "cmis",
+      "freshness_policy": "evidence_scoped",
+      "scope_policy": "bounded_scope_must_be_preserved",
+      "question_families": [
+        "regulatory",
+        "framework",
+        "jurisdiction"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    },
+    {
+      "id": "instant_x1_scan",
+      "chain": "x1",
+      "state": "contract_exposed",
+      "direct_operation": true,
+      "evidence_authority": "cmis",
+      "freshness_policy": "required_for_current_claims",
+      "scope_policy": "service_scope_must_be_preserved",
+      "question_families": [
+        "scan",
+        "market_state",
+        "tokenomics",
+        "risk",
+        "decision_support"
+      ],
+      "allowed_conclusions": [
+        "state only what accepted evidence supports",
+        "preserve unknown, partial, unavailable, and ambiguous states"
+      ],
+      "forbidden_conclusions": [
+        "invent missing facts",
+        "present stale or unverified evidence as current",
+        "generalize beyond the verified scope"
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "human_workflows": [
+    {
+      "id": "instant_x1_scan",
+      "source_contract": "instant_x1_scan_product_view/v1",
+      "cmis_services": [
+        "instant_x1_scan"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_compare",
+      "source_contract": "x1_compare/v1",
+      "cmis_services": [
+        "instant_x1_scan",
+        "historical_compare"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_burn_intelligence",
+      "source_contract": "x1_burn_intelligence/v1",
+      "cmis_services": [
+        "burn_intelligence"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_discovery_intelligence",
+      "source_contract": "x1_discovery_intelligence/v1",
+      "cmis_services": [
+        "discovery_intelligence"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_what_changed",
+      "source_contract": "x1_what_changed/v1",
+      "cmis_services": [],
+      "state": "human_renderer_supported",
+      "mapping_status": "renderer_supported_mapping_deferred",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_concentration_warning_intelligence",
+      "source_contract": "x1_concentration_warning_intelligence/v1",
+      "cmis_services": [
+        "concentration_warning_intelligence"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_cross_chain_asset_provenance",
+      "source_contract": "x1_cross_chain_asset_provenance/v1",
+      "cmis_services": [
+        "cross_chain_asset_provenance"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_trade_price_impact_intelligence",
+      "source_contract": "x1_trade_price_impact_intelligence/v1",
+      "cmis_services": [
+        "trade_price_impact_intelligence"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_large_trade_discovery",
+      "source_contract": "x1_large_trade_discovery/v1",
+      "cmis_services": [
+        "large_trade_discovery"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    },
+    {
+      "id": "x1_regulatory_intelligence",
+      "source_contract": "x1_regulatory_intelligence/v1",
+      "cmis_services": [
+        "regulatory_evidence"
+      ],
+      "state": "human_renderer_supported",
+      "mapping_status": "mapped",
+      "facts_authority": "chain_scout_cmis",
+      "judgment_authority": "roberta",
+      "read_only": true,
+      "execution_authorized": false
+    }
+  ]
+}
