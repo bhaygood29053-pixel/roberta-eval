@@ -1,0 +1,16 @@
+{
+  "policy_version": "roberta_release_policy/v1",
+  "deterministic": {
+    "max_failures": 0,
+    "max_critical_findings": 0,
+    "max_regression_replay_failures": 0,
+    "block_on_regressed_trend": true
+  },
+  "advisory": {
+    "human_quality_warn_below": 70,
+    "blocking": false
+  },
+  "scope": {
+    "live_release_requires_live_roberta_qualified": true
+  }
+}
