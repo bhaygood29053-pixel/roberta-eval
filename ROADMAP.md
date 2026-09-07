@@ -331,7 +331,7 @@ Current LAB #22 implementation candidate:
 - CLI and deterministic CI smoke;
 - no provider-truth or all-natural-language certification.
 
-Acceptance is pending the LAB #22 PR/CI merge gate.
+Acceptance completed via LAB #22 PR #46 / merge `7eefde5355e99453f43cb4662226200b156cf7a0`. The accepted capability remains diagnostic/read-only and does not widen LAB #21 qualification scope.
 
 
 ## Quality rule
