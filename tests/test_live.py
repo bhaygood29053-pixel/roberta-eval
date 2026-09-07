@@ -116,7 +116,10 @@ def test_live_grader_passes_claims_that_match_evidence() -> None:
 
     assert result["verdict"] == "PASS"
     assert result["checked_claims"] == 1
-    assert result["live_roberta_qualified"] is True
+    assert result["live_evidence_contract_qualified"] is True
+    assert result["live_roberta_qualified"] is False
+    assert result["provider_truth_certified"] is False
+    assert result["all_natural_language_claims_certified"] is False
 
 
 def test_live_grader_requires_claim_integrity_certificate() -> None:
