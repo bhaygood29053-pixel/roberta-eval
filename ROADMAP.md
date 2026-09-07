@@ -187,8 +187,6 @@ Current LAB #13 implementation:
 
 Acceptance completed in merged LAB #13.
 
-## Active
-
 ### LAB #14 — Failure Clustering v1
 Collapse recurring failures into stable actionable defect clusters.
 
@@ -201,12 +199,26 @@ Current LAB #14 implementation:
 - stable member/run/case provenance;
 - deterministic ordering and CLI/CI support.
 
-Acceptance is complete when the LAB #14 PR is green and merged.
+Acceptance completed in merged LAB #14.
 
-## Next
+## Active
 
 ### LAB #15 — Regression Memory v1
-Persist confirmed defects as permanent replayable regression cases.
+Persist confirmed actionable product defects as permanent replayable regression cases.
+
+Current LAB #15 implementation:
+- versioned repository regression-memory store;
+- confirmation required before promotion;
+- evaluation-incomplete/error clusters are ineligible;
+- source service and replayability validated;
+- stable idempotent regression IDs;
+- fixture/objective/checks retained for replay;
+- execution remains unauthorized;
+- CLI/CI memory validation.
+
+Acceptance is complete when the LAB #15 PR is green and merged.
+
+## Next
 
 ### LAB #16 — Trend Intelligence v1
 Compare evaluation runs/releases and quantify improvement/regression.

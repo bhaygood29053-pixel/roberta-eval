@@ -1,0 +1,5 @@
+{
+  "memory_version": "roberta_regression_memory/v1",
+  "policy": "Only confirmed actionable product clusters with replayable source cases may enter permanent regression memory.",
+  "records": []
+}
