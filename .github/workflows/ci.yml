@@ -25,3 +25,6 @@ jobs:
 
       - name: Laboratory doctor
         run: roberta-eval doctor
+
+      - name: Capability registry
+        run: roberta-eval capabilities
