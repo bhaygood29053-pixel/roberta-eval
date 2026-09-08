@@ -190,78 +190,50 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
 
     integrity = evidence.get("claim_integrity")
     projection_integrity = evidence.get("evaluation_projection_integrity")
-    integrity_contract = None
+    factual_claim_count = sum(
+        1
+        for claim in claims
+        if isinstance(claim, dict)
+        and isinstance(claim.get("evidence_path"), str)
+        and claim["evidence_path"].startswith("factual_response.")
+    )
+    decision_claim_count = len(claims) - factual_claim_count
+    integrity_contracts: list[str] = []
 
-    if telemetry_version == LIVE_TELEMETRY_V1:
+    def _claim_integrity_failure() -> dict[str, Any]:
+        return {
+            "live_grader_version": LIVE_GRADE_VERSION,
+            "run_id": record.get("run_id"),
+            "record_id": record.get("record_id"),
+            "case_id": record.get("case_id"),
+            "service": record.get("service"),
+            "verdict": "FAIL",
+            "reason": "claim_integrity_not_pass",
+            "severity": "HIGH",
+            "live_roberta_qualified": False,
+        }
+
+    if telemetry_version == LIVE_TELEMETRY_V1 or decision_claim_count:
         if not isinstance(integrity, dict):
             return _missing_telemetry(record, "claim_integrity_unavailable")
         if integrity.get("contract_version") != "roberta_claim_integrity/v1":
             return _missing_telemetry(record, "claim_integrity_contract_unavailable")
         if integrity.get("status") != "PASS":
-            return {
-                "live_grader_version": LIVE_GRADE_VERSION,
-                "run_id": record.get("run_id"),
-                "record_id": record.get("record_id"),
-                "case_id": record.get("case_id"),
-                "service": record.get("service"),
-                "verdict": "FAIL",
-                "reason": "claim_integrity_not_pass",
-                "severity": "HIGH",
-                "live_roberta_qualified": False,
-            }
-        integrity_contract = "roberta_claim_integrity/v1"
-    elif isinstance(integrity, dict):
-        if integrity.get("contract_version") != "roberta_claim_integrity/v1":
-            return _missing_telemetry(record, "claim_integrity_contract_unavailable")
-        if integrity.get("status") != "PASS":
-            return {
-                "live_grader_version": LIVE_GRADE_VERSION,
-                "run_id": record.get("run_id"),
-                "record_id": record.get("record_id"),
-                "case_id": record.get("case_id"),
-                "service": record.get("service"),
-                "verdict": "FAIL",
-                "reason": "claim_integrity_not_pass",
-                "severity": "HIGH",
-                "live_roberta_qualified": False,
-            }
-        integrity_contract = "roberta_claim_integrity/v1"
-    elif isinstance(projection_integrity, dict):
+            return _claim_integrity_failure()
+        integrity_contracts.append("roberta_claim_integrity/v1")
+
+    if telemetry_version == LIVE_TELEMETRY_VERSION and factual_claim_count:
+        if not isinstance(projection_integrity, dict):
+            return _missing_telemetry(record, "claim_integrity_unavailable")
         if projection_integrity.get("contract_version") != PROJECTION_INTEGRITY_CONTRACT:
             return _missing_telemetry(record, "claim_integrity_contract_unavailable")
         if projection_integrity.get("status") != "PASS":
-            return {
-                "live_grader_version": LIVE_GRADE_VERSION,
-                "run_id": record.get("run_id"),
-                "record_id": record.get("record_id"),
-                "case_id": record.get("case_id"),
-                "service": record.get("service"),
-                "verdict": "FAIL",
-                "reason": "claim_integrity_not_pass",
-                "severity": "HIGH",
-                "live_roberta_qualified": False,
-            }
-        factual_claim_count = sum(
-            1
-            for claim in claims
-            if isinstance(claim, dict)
-            and isinstance(claim.get("evidence_path"), str)
-            and claim["evidence_path"].startswith("factual_response.")
-        )
+            return _claim_integrity_failure()
         if projection_integrity.get("claim_count") != factual_claim_count:
-            return {
-                "live_grader_version": LIVE_GRADE_VERSION,
-                "run_id": record.get("run_id"),
-                "record_id": record.get("record_id"),
-                "case_id": record.get("case_id"),
-                "service": record.get("service"),
-                "verdict": "FAIL",
-                "reason": "claim_integrity_not_pass",
-                "severity": "HIGH",
-                "live_roberta_qualified": False,
-            }
-        integrity_contract = PROJECTION_INTEGRITY_CONTRACT
-    else:
+            return _claim_integrity_failure()
+        integrity_contracts.append(PROJECTION_INTEGRITY_CONTRACT)
+
+    if not integrity_contracts:
         return _missing_telemetry(record, "claim_integrity_unavailable")
 
     if execution is not False:
@@ -313,7 +285,7 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
         "reason": "live_evidence_contract_satisfied",
         "checked_claims": checked_claims,
         "telemetry_version": response.get("evaluation_telemetry_version"),
-        "integrity_contract": integrity_contract,
+        "integrity_contract": "+".join(integrity_contracts),
         "live_evidence_contract_qualified": True,
         "live_roberta_qualified": False,
         "provider_truth_certified": False,
