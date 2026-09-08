@@ -424,3 +424,57 @@ def test_live_grader_accepts_material_market_claim_from_instant_scan_projection(
 
     assert result["verdict"] == "PASS"
     assert result["checked_claims"] == 1
+
+
+def test_live_grader_v2_identifies_missing_current_x1_evidence() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "A direct answer with no current X1 Scout result.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v2",
+                "evaluation_evidence": {},
+                "claims": [],
+                "evidence_provenance": {
+                    "facts_authority": None,
+                    "judgment_authority": None,
+                },
+                "evidence_freshness": {"state": "UNAVAILABLE"},
+                "execution_authorized": False,
+            },
+            service="tokenomics",
+        )
+    )
+
+    assert result["verdict"] == "EVIDENCE_REQUIRED"
+    assert result["reason"] == "current_x1_evidence_unavailable"
+
+
+def test_live_grader_v2_preserves_projection_gap_when_factual_envelope_exists() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "A factual response whose projection emitted no claims.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v2",
+                "evaluation_evidence": {
+                    "factual_response": {
+                        "contract_version": "roberta_evaluation_factual_evidence/v1",
+                        "findings": {"data": {}, "risk": None},
+                    }
+                },
+                "claims": [],
+                "evidence_provenance": {
+                    "facts_authority": "chain_scout_cmis",
+                },
+                "evidence_freshness": {"state": "UNKNOWN"},
+                "execution_authorized": False,
+            },
+            service="tokenomics",
+        )
+    )
+
+    assert result["verdict"] == "EVIDENCE_REQUIRED"
+    assert result["reason"] == "canonical_claims_empty"
