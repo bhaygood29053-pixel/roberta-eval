@@ -152,3 +152,32 @@ def test_report_is_json_serializable_and_deterministic():
     second = diagnose_live_grades(list(reversed(results)))
 
     assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
+
+
+def test_missing_current_x1_evidence_is_owned_by_protected_orchestration() -> None:
+    report = diagnose_live_grades(
+        [
+            grade(
+                "1",
+                "tokenomics",
+                "EVIDENCE_REQUIRED",
+                "current_x1_evidence_unavailable",
+            ),
+            grade(
+                "2",
+                "risk_check",
+                "EVIDENCE_REQUIRED",
+                "current_x1_evidence_unavailable",
+            ),
+        ]
+    )
+
+    group = report["recommended_next_group"]
+    assert group["reason"] == "current_x1_evidence_unavailable"
+    assert group["diagnostic_class"] == "current_x1_evidence_delegation_gap"
+    assert group["owner_repository"] == "bhaygood29053-pixel/roberta-core"
+    assert group["component"] == "roberta_oracle_evidence_delegation"
+    assert group["product_defect_candidate"] is True
+    assert report["product_defect_candidate_count"] == 2
+    assert report["actual_live_failures_present"] is False
+    assert report["evidence_gaps_present"] is True

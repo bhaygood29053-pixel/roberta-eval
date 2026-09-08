@@ -53,6 +53,19 @@ _REASON_RULES: dict[str, dict[str, Any]] = {
         "product_defect_candidate": False,
         "recommended_action": "Restore whitelisted accepted final-message evidence in the evaluation projection.",
     },
+    "current_x1_evidence_unavailable": {
+        "diagnostic_class": "current_x1_evidence_delegation_gap",
+        "owner_repository": "bhaygood29053-pixel/roberta-core",
+        "component": "roberta_oracle_evidence_delegation",
+        "priority": "P1",
+        "qualification_blocking": True,
+        "product_defect_candidate": True,
+        "recommended_action": (
+            "Require a current-turn X1 Scout result before ROBERTA can finish an "
+            "explicit current/verified X1 evidence request; retry once and fail "
+            "closed if delegation is still missing."
+        ),
+    },
     "canonical_claims_unavailable": {
         "diagnostic_class": "canonical_claim_coverage_gap",
         "owner_repository": "bhaygood29053-pixel/roberta-langgraph",
