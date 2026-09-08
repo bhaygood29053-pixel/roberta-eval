@@ -131,6 +131,116 @@ def _resolve(root: dict[str, Any], path: str) -> tuple[bool, Any]:
     return True, value
 
 
+def _material_claim_coverage(
+    service: object,
+    claims: list[dict[str, Any]],
+) -> bool:
+    service_id = str(service or "")
+    paths = [
+        str(claim.get("evidence_path") or "")
+        for claim in claims
+        if isinstance(claim, dict)
+    ]
+
+    if service_id == "asset_lookup":
+        return any(
+            path in {
+                "asset.symbol",
+                "asset.mint",
+                "factual_response.asset.symbol",
+                "factual_response.asset.mint",
+            }
+            for path in paths
+        )
+
+    if service_id == "market_report":
+        market_fields = {
+            "price",
+            "price_usd",
+            "liquidity",
+            "liquidity_usd",
+            "volume_24h",
+            "volume_24h_usd",
+            "transactions_24h",
+            "#LPs",
+        }
+        return any(
+            path.startswith("factual_response.findings.data.sections.market.")
+            and path.rsplit(".", 1)[-1] in market_fields
+            or path.startswith("factual_response.findings.data.")
+            and path.rsplit(".", 1)[-1] in market_fields
+            for path in paths
+        )
+
+    if service_id == "tokenomics":
+        tokenomics_fields = {
+            "total_supply",
+            "current_total_supply",
+            "circulating_supply",
+            "mint_authority",
+            "freeze_authority",
+            "maximum_supply",
+        }
+        return any(
+            ".tokenomics." in path
+            or (
+                path.startswith("factual_response.findings.data.")
+                and path.rsplit(".", 1)[-1] in tokenomics_fields
+            )
+            for path in paths
+        )
+
+    if service_id == "risk_check":
+        return any(
+            path.startswith("factual_response.findings.risk.")
+            or ".sections.risk." in path
+            for path in paths
+        )
+
+    if service_id == "pre_trade_check":
+        return any(
+            path == "human_response_decision.recommendation"
+            or path.startswith("factual_response.findings.data.trade.")
+            or path.startswith("factual_response.findings.risk.")
+            for path in paths
+        )
+
+    if service_id == "instant_x1_scan":
+        return any(
+            ".sections.market." in path
+            or ".sections.risk." in path
+            or ".sections.tokenomics." in path
+            for path in paths
+        )
+
+    if service_id == "historical_compare":
+        return any(
+            "history" in path.lower()
+            or "historical" in path.lower()
+            or path.rsplit(".", 1)[-1]
+            in {
+                "current_value",
+                "historical_value",
+                "change_pct",
+                "absolute_change_pct",
+                "first_verified_observed_at",
+                "last_verified_observed_at",
+            }
+            for path in paths
+        )
+
+    if service_id == "verification_evidence":
+        return any(
+            path.startswith("factual_response.evidence_context.")
+            for path in paths
+        )
+
+    # Dedicated burn/discovery contracts vary by promoted payload. Exact
+    # claim/evidence equality still applies; service-specific relevance will be
+    # tightened after the first v2 live evidence exposes their accepted shapes.
+    return True
+
+
 def _missing_telemetry(record: dict[str, Any], reason: str) -> dict[str, Any]:
     return {
         "live_grader_version": LIVE_GRADE_VERSION,
@@ -187,6 +297,8 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
         return _missing_telemetry(record, "evidence_provenance_unavailable")
     if not isinstance(freshness, dict):
         return _missing_telemetry(record, "evidence_freshness_unavailable")
+    if not _material_claim_coverage(record.get("service"), claims):
+        return _missing_telemetry(record, "material_claim_coverage_missing")
 
     integrity = evidence.get("claim_integrity")
     projection_integrity = evidence.get("evaluation_projection_integrity")

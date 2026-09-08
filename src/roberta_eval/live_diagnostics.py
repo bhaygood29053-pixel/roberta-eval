@@ -71,6 +71,18 @@ _REASON_RULES: dict[str, dict[str, Any]] = {
         "product_defect_candidate": False,
         "recommended_action": "Add claim projection coverage for the affected accepted service/workflow.",
     },
+    "material_claim_coverage_missing": {
+        "diagnostic_class": "canonical_claim_relevance_gap",
+        "owner_repository": "bhaygood29053-pixel/roberta-langgraph",
+        "component": "evaluation_canonical_claim_projection",
+        "priority": "P1",
+        "qualification_blocking": True,
+        "product_defect_candidate": False,
+        "recommended_action": (
+            "Project canonical claims that cover the material facts for the "
+            "requested service before using the live result for qualification."
+        ),
+    },
     "canonical_claim_invalid": {
         "diagnostic_class": "canonical_claim_coverage_gap",
         "owner_repository": "bhaygood29053-pixel/roberta-langgraph",

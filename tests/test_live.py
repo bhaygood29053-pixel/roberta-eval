@@ -11,13 +11,13 @@ from roberta_eval.live import (
 from roberta_eval.runner import select_cases
 
 
-def _live_record(response: dict) -> dict:
+def _live_record(response: dict, *, service: str = "asset_lookup") -> dict:
     return {
         "record_version": "roberta_eval_run_record/v1",
         "run_id": "live-test",
-        "record_id": "live-test:case",
-        "case_id": "live.asset_lookup.identity::xnt",
-        "service": "asset_lookup",
+        "record_id": f"live-test:{service}",
+        "case_id": f"live.{service}.test::xnt",
+        "service": service,
         "case_data_mode": "live_evidence",
         "runtime_status": "ok",
         "response": response,
@@ -238,7 +238,8 @@ def test_live_grader_passes_v2_factual_projection_integrity() -> None:
                 },
                 "evidence_freshness": {"state": "VERIFIED"},
                 "execution_authorized": False,
-            }
+            },
+            service="market_report",
         )
     )
 
@@ -277,7 +278,8 @@ def test_live_grader_v2_requires_projection_or_claim_integrity() -> None:
                 },
                 "evidence_freshness": {"state": "VERIFIED"},
                 "execution_authorized": False,
-            }
+            },
+            service="market_report",
         )
     )
 
@@ -315,9 +317,110 @@ def test_live_grader_v2_fails_projection_claim_count_mismatch() -> None:
                 },
                 "evidence_freshness": {"state": "VERIFIED"},
                 "execution_authorized": False,
-            }
+            },
+            service="market_report",
         )
     )
 
     assert result["verdict"] == "FAIL"
     assert result["reason"] == "claim_integrity_not_pass"
+
+
+def test_live_grader_requires_material_market_claim_coverage() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "Market prose with irrelevant projected history only.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v2",
+                "evaluation_evidence": {
+                    "factual_response": {
+                        "findings": {
+                            "data": {
+                                "sections": {
+                                    "history": {
+                                        "coverage_seconds": 12345
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "evaluation_projection_integrity": {
+                        "contract_version": "roberta_evaluation_projection_integrity/v1",
+                        "status": "PASS",
+                        "claim_count": 1,
+                    },
+                },
+                "claims": [
+                    {
+                        "name": "history_coverage",
+                        "evidence_path": (
+                            "factual_response.findings.data.sections."
+                            "history.coverage_seconds"
+                        ),
+                        "value": 12345,
+                    }
+                ],
+                "evidence_provenance": {
+                    "facts_authority": "chain_scout_cmis"
+                },
+                "evidence_freshness": {"state": "UNKNOWN"},
+                "execution_authorized": False,
+            },
+            service="market_report",
+        )
+    )
+
+    assert result["verdict"] == "EVIDENCE_REQUIRED"
+    assert result["reason"] == "material_claim_coverage_missing"
+
+
+def test_live_grader_accepts_material_market_claim_from_instant_scan_projection() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "Market evidence.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v2",
+                "evaluation_evidence": {
+                    "factual_response": {
+                        "findings": {
+                            "data": {
+                                "sections": {
+                                    "market": {
+                                        "price_usd": 0.32
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "evaluation_projection_integrity": {
+                        "contract_version": "roberta_evaluation_projection_integrity/v1",
+                        "status": "PASS",
+                        "claim_count": 1,
+                    },
+                },
+                "claims": [
+                    {
+                        "name": "market_price_usd",
+                        "evidence_path": (
+                            "factual_response.findings.data.sections."
+                            "market.price_usd"
+                        ),
+                        "value": 0.32,
+                    }
+                ],
+                "evidence_provenance": {
+                    "facts_authority": "chain_scout_cmis"
+                },
+                "evidence_freshness": {"state": "UNKNOWN"},
+                "execution_authorized": False,
+            },
+            service="market_report",
+        )
+    )
+
+    assert result["verdict"] == "PASS"
+    assert result["checked_claims"] == 1
