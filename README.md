@@ -71,6 +71,8 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
+Current next step: synchronize all five operational repositories and assembled runtimes, rerun the 20-case LAB #21 live smoke plan, then feed the grades through LAB #22 before fixing or promoting any regression.
+
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
 A LAB #21 `PASS` is deliberately bounded: it proves the selected canonical structured claims match the captured accepted evidence and the final response carries `roberta_claim_integrity/v1` PASS. It does **not** certify upstream provider truth or every natural-language sentence, so `live_roberta_qualified` remains false in v1.

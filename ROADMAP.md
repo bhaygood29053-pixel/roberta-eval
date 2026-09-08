@@ -334,6 +334,21 @@ Current LAB #22 implementation candidate:
 Acceptance completed via LAB #22 PR #46 / merge `7eefde5355e99453f43cb4662226200b156cf7a0`. The accepted capability remains diagnostic/read-only and does not widen LAB #21 qualification scope.
 
 
+## Current operational gate — repaired-runtime live qualification
+
+LAB #21 and LAB #22 are accepted. The next Laboratory step is operational proof against the synchronized local ROBERTA runtime, not a new fixture milestone:
+
+1. synchronize `cmis`, `cmis-core`, `roberta-langgraph`, `roberta-core`, and `roberta-eval` to accepted `origin/main`;
+2. refresh the assembled CMIS/ROBERTA runtimes and verify bridge health;
+3. run the 20-case LAB #21 XNT/AGI live smoke plan;
+4. record actual PASS / EVIDENCE_REQUIRED / FAIL outcomes without converting missing telemetry/evidence into a factual FAIL;
+5. run LAB #22 diagnostics and localize each confirmed failure to runtime, ROBERTA, Scout, CMIS/provider, or Laboratory evidence;
+6. fix confirmed product defects narrowly, rerun the same cases, and measure improvement;
+7. promote only confirmed recurring/replayable defects into LAB #15 regression memory.
+
+The bridge stateless-request compatibility fix is accepted upstream through public ROBERTA #401 and protected `roberta-core` #86, but that code acceptance is not a substitute for this live evaluation rerun.
+
+
 ## Quality rule
 
 Scale is not success by itself. A smaller suite with trustworthy expectations is more valuable than thousands of poorly specified questions.
