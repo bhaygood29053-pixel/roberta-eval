@@ -278,7 +278,8 @@ def test_live_grader_v2_requires_projection_or_claim_integrity() -> None:
                 },
                 "evidence_freshness": {"state": "VERIFIED"},
                 "execution_authorized": False,
-            }
+            },
+            service="market_report",
         )
     )
 
@@ -316,7 +317,8 @@ def test_live_grader_v2_fails_projection_claim_count_mismatch() -> None:
                 },
                 "evidence_freshness": {"state": "VERIFIED"},
                 "execution_authorized": False,
-            }
+            },
+            service="market_report",
         )
     )
 
