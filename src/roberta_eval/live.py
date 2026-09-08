@@ -11,7 +11,12 @@ from .taxonomy import load_taxonomy
 
 LIVE_CASE_VERSION = "roberta_live_eval_case/v1"
 LIVE_GRADE_VERSION = "roberta_live_evidence_grader/v1"
-LIVE_TELEMETRY_VERSION = "roberta_evaluation_telemetry/v1"
+LIVE_TELEMETRY_V1 = "roberta_evaluation_telemetry/v1"
+LIVE_TELEMETRY_VERSION = "roberta_evaluation_telemetry/v2"
+SUPPORTED_LIVE_TELEMETRY_VERSIONS = frozenset(
+    {LIVE_TELEMETRY_V1, LIVE_TELEMETRY_VERSION}
+)
+PROJECTION_INTEGRITY_CONTRACT = "roberta_evaluation_projection_integrity/v1"
 
 
 def default_live_subjects_path() -> Path:
@@ -160,7 +165,8 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(response, dict):
         return _missing_telemetry(record, "response_unavailable")
 
-    if response.get("evaluation_telemetry_version") != LIVE_TELEMETRY_VERSION:
+    telemetry_version = response.get("evaluation_telemetry_version")
+    if telemetry_version not in SUPPORTED_LIVE_TELEMETRY_VERSIONS:
         return _missing_telemetry(record, "evaluation_telemetry_version_unavailable")
 
     evidence = response.get("evaluation_evidence")
@@ -183,11 +189,18 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
         return _missing_telemetry(record, "evidence_freshness_unavailable")
 
     integrity = evidence.get("claim_integrity")
-    if not isinstance(integrity, dict):
-        return _missing_telemetry(record, "claim_integrity_unavailable")
-    if integrity.get("contract_version") != "roberta_claim_integrity/v1":
-        return _missing_telemetry(record, "claim_integrity_contract_unavailable")
-    if integrity.get("status") != "PASS":
+    projection_integrity = evidence.get("evaluation_projection_integrity")
+    factual_claim_count = sum(
+        1
+        for claim in claims
+        if isinstance(claim, dict)
+        and isinstance(claim.get("evidence_path"), str)
+        and claim["evidence_path"].startswith("factual_response.")
+    )
+    decision_claim_count = len(claims) - factual_claim_count
+    integrity_contracts: list[str] = []
+
+    def _claim_integrity_failure() -> dict[str, Any]:
         return {
             "live_grader_version": LIVE_GRADE_VERSION,
             "run_id": record.get("run_id"),
@@ -199,6 +212,29 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
             "severity": "HIGH",
             "live_roberta_qualified": False,
         }
+
+    if telemetry_version == LIVE_TELEMETRY_V1 or decision_claim_count:
+        if not isinstance(integrity, dict):
+            return _missing_telemetry(record, "claim_integrity_unavailable")
+        if integrity.get("contract_version") != "roberta_claim_integrity/v1":
+            return _missing_telemetry(record, "claim_integrity_contract_unavailable")
+        if integrity.get("status") != "PASS":
+            return _claim_integrity_failure()
+        integrity_contracts.append("roberta_claim_integrity/v1")
+
+    if telemetry_version == LIVE_TELEMETRY_VERSION and factual_claim_count:
+        if not isinstance(projection_integrity, dict):
+            return _missing_telemetry(record, "claim_integrity_unavailable")
+        if projection_integrity.get("contract_version") != PROJECTION_INTEGRITY_CONTRACT:
+            return _missing_telemetry(record, "claim_integrity_contract_unavailable")
+        if projection_integrity.get("status") != "PASS":
+            return _claim_integrity_failure()
+        if projection_integrity.get("claim_count") != factual_claim_count:
+            return _claim_integrity_failure()
+        integrity_contracts.append(PROJECTION_INTEGRITY_CONTRACT)
+
+    if not integrity_contracts:
+        return _missing_telemetry(record, "claim_integrity_unavailable")
 
     if execution is not False:
         return {
@@ -249,6 +285,7 @@ def grade_live_record(record: dict[str, Any]) -> dict[str, Any]:
         "reason": "live_evidence_contract_satisfied",
         "checked_claims": checked_claims,
         "telemetry_version": response.get("evaluation_telemetry_version"),
+        "integrity_contract": "+".join(integrity_contracts),
         "live_evidence_contract_qualified": True,
         "live_roberta_qualified": False,
         "provider_truth_certified": False,

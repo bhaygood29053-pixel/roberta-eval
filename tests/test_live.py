@@ -188,3 +188,136 @@ def test_live_grader_refuses_synthetic_record() -> None:
 
     with pytest.raises(ValueError, match="refuses non-live"):
         grade_live_record(record)
+
+
+def test_live_grader_passes_v2_factual_projection_integrity() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "XNT market evidence is available.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v2",
+                "evaluation_evidence": {
+                    "factual_response": {
+                        "contract_version": "roberta_evaluation_factual_evidence/v1",
+                        "findings": {
+                            "data": {
+                                "price": 0.0123,
+                                "liquidity": 5000.0,
+                            }
+                        },
+                    },
+                    "evaluation_projection_integrity": {
+                        "contract_version": "roberta_evaluation_projection_integrity/v1",
+                        "status": "PASS",
+                        "claim_count": 2,
+                        "provider_truth_certified": False,
+                        "all_natural_language_claims_certified": False,
+                        "execution_authorized": False,
+                    },
+                },
+                "claims": [
+                    {
+                        "name": "factual_data_price",
+                        "evidence_path": "factual_response.findings.data.price",
+                        "value": 0.0123,
+                    },
+                    {
+                        "name": "factual_data_liquidity",
+                        "evidence_path": "factual_response.findings.data.liquidity",
+                        "value": 5000.0,
+                    },
+                ],
+                "evidence_provenance": {
+                    "facts_authority": "chain_scout_cmis",
+                    "factual_projection": {
+                        "second_cmis_query_performed": False,
+                        "prose_claim_inference_performed": False,
+                    },
+                },
+                "evidence_freshness": {"state": "VERIFIED"},
+                "execution_authorized": False,
+            }
+        )
+    )
+
+    assert result["verdict"] == "PASS"
+    assert result["checked_claims"] == 2
+    assert (
+        result["integrity_contract"]
+        == "roberta_evaluation_projection_integrity/v1"
+    )
+    assert result["provider_truth_certified"] is False
+    assert result["all_natural_language_claims_certified"] is False
+
+
+def test_live_grader_v2_requires_projection_or_claim_integrity() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "Structured factual answer.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v2",
+                "evaluation_evidence": {
+                    "factual_response": {
+                        "findings": {"data": {"price": 0.0123}}
+                    }
+                },
+                "claims": [
+                    {
+                        "name": "factual_data_price",
+                        "evidence_path": "factual_response.findings.data.price",
+                        "value": 0.0123,
+                    }
+                ],
+                "evidence_provenance": {
+                    "facts_authority": "chain_scout_cmis"
+                },
+                "evidence_freshness": {"state": "VERIFIED"},
+                "execution_authorized": False,
+            }
+        )
+    )
+
+    assert result["verdict"] == "EVIDENCE_REQUIRED"
+    assert result["reason"] == "claim_integrity_unavailable"
+
+
+def test_live_grader_v2_fails_projection_claim_count_mismatch() -> None:
+    result = grade_live_record(
+        _live_record(
+            {
+                "service": "roberta_bridge",
+                "status": "ok",
+                "reply": "Structured factual answer.",
+                "evaluation_telemetry_version": "roberta_evaluation_telemetry/v2",
+                "evaluation_evidence": {
+                    "factual_response": {
+                        "findings": {"data": {"price": 0.0123}}
+                    },
+                    "evaluation_projection_integrity": {
+                        "contract_version": "roberta_evaluation_projection_integrity/v1",
+                        "status": "PASS",
+                        "claim_count": 2,
+                    },
+                },
+                "claims": [
+                    {
+                        "name": "factual_data_price",
+                        "evidence_path": "factual_response.findings.data.price",
+                        "value": 0.0123,
+                    }
+                ],
+                "evidence_provenance": {
+                    "facts_authority": "chain_scout_cmis"
+                },
+                "evidence_freshness": {"state": "VERIFIED"},
+                "execution_authorized": False,
+            }
+        )
+    )
+
+    assert result["verdict"] == "FAIL"
+    assert result["reason"] == "claim_integrity_not_pass"
