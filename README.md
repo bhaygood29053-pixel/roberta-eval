@@ -71,7 +71,7 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
-Current next step: synchronize all five operational repositories and assembled runtimes, rerun the 20-case LAB #21 live smoke plan, then feed the grades through LAB #22 before fixing or promoting any regression.
+Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. Accepted LAB #21/#22 logic localizes the 12 blocked burn/history/pre-trade/risk/tokenomics/verification-evidence cases to protected `current_x1_evidence_delegation_gap`. The next exact step is deterministic acceptance of protected `roberta-core` Issue #89 / PR #90; after merge and five-repo runtime synchronization, run the same preserved 20 cases as `live-smoke-005`, then grade and diagnose again.
 
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
