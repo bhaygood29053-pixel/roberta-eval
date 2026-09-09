@@ -334,19 +334,51 @@ Current LAB #22 implementation candidate:
 Acceptance completed via LAB #22 PR #46 / merge `7eefde5355e99453f43cb4662226200b156cf7a0`. The accepted capability remains diagnostic/read-only and does not widen LAB #21 qualification scope.
 
 
-## Current operational gate — repaired-runtime live qualification
+## Current operational gate — live-smoke-004 → protected delegation repair
 
-LAB #21 and LAB #22 are accepted. The next Laboratory step is operational proof against the synchronized local ROBERTA runtime, not a new fixture milestone:
+LAB #21 and LAB #22 are accepted, and the repaired-runtime proof has now produced a real baseline.
 
-1. synchronize `cmis`, `cmis-core`, `roberta-langgraph`, `roberta-core`, and `roberta-eval` to accepted `origin/main`;
-2. refresh the assembled CMIS/ROBERTA runtimes and verify bridge health;
-3. run the 20-case LAB #21 XNT/AGI live smoke plan;
-4. record actual PASS / EVIDENCE_REQUIRED / FAIL outcomes without converting missing telemetry/evidence into a factual FAIL;
-5. run LAB #22 diagnostics and localize each confirmed failure to runtime, ROBERTA, Scout, CMIS/provider, or Laboratory evidence;
-6. fix confirmed product defects narrowly, rerun the same cases, and measure improvement;
-7. promote only confirmed recurring/replayable defects into LAB #15 regression memory.
+`live-smoke-004` results:
 
-The bridge stateless-request compatibility fix is accepted upstream through public ROBERTA #401 and protected `roberta-core` #86, but that code acceptance is not a substitute for this live evaluation rerun.
+- 20/20 runtime requests returned `ok`;
+- PASS: **8**;
+- EVIDENCE_REQUIRED: **12**;
+- FAIL: **0**;
+- synthetic ground truth: false;
+- provider truth certification: false;
+- all-natural-language certification: false.
+
+Fully gradeable on both XNT and AGI:
+
+- `asset_lookup`;
+- `discovery_intelligence`;
+- `instant_x1_scan`;
+- `market_report`.
+
+The 12 blocked cases span:
+
+- `burn_intelligence`;
+- `historical_compare`;
+- `pre_trade_check`;
+- `risk_check`;
+- `tokenomics`;
+- `verification_evidence`.
+
+LAB #21/#22 reclassification through PR #51 / merge `9f97bd640c4b85d9a85ce6a15af153f46f428744` proves these cases are `current_x1_evidence_unavailable`, localized to `current_x1_evidence_delegation_gap` / protected `roberta_oracle_evidence_delegation`. They remain EVIDENCE_REQUIRED rather than factual FAIL, but they are product-defect candidates.
+
+The active production remediation is protected `roberta-core` Issue #89 / PR #90. PR #90 remains **OPEN / UNACCEPTED**. The first executable local targeted run reached the new regression suite and produced 5 PASS / 1 FAIL; the single missed historical-compare wording was patched at head `ba9a26a75367b352cc6603f0be6d062fe92dcc99`.
+
+Next Laboratory sequence:
+
+1. wait for deterministic package + pinned-public-shell acceptance of protected PR #90;
+2. after accepted merge, synchronize all five repositories/runtimes;
+3. run the same 20 cases as `live-smoke-005`;
+4. grade and diagnose with LAB #21/#22;
+5. measure movement from the 8/12/0 baseline without forcing PASS;
+6. close protected #89/public #404 only if live evidence proves the delegation gap is resolved;
+7. promote only confirmed recurring/replayable defects into LAB #15 Regression Memory.
+
+The Laboratory must preserve `live-smoke-004` as the pre-fix baseline.
 
 
 ## Quality rule
