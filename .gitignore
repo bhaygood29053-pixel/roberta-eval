@@ -9,4 +9,5 @@ build/
 reports/*.json
 reports/*.jsonl
 reports/*.html
+results/
 .env
