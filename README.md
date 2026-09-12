@@ -23,6 +23,37 @@ The Laboratory evaluates ROBERTA; it does not silently change ROBERTA, Scout, CM
 
 See `ROADMAP.md`, `ARCHITECTURE.md`, and `LAB_CONTRACT.md` as the project develops.
 
+## Zero-token Human ROBERTA v2 grading
+
+Human-language grading is deterministic by default and does **not** require DeepSeek or another LLM judge.
+
+The existing `quality` command now runs the Human ROBERTA v2 language gate over saved `roberta_eval_run_record/v1` JSONL records. It checks Quick/Normal responses for internal engineering language, report-style status dumps, meaning-after-jargon, and execution-authority leakage. Deep Dive remains the explicit technical surface.
+
+Grade an already-captured run without making another ROBERTA or model call:
+
+```bash
+roberta-eval quality \
+  --input /tmp/roberta-live-run.jsonl \
+  --output /tmp/roberta-human-quality.jsonl
+```
+
+The summary includes:
+
+- `human_v2.verdict_counts.PASS`
+- `human_v2.verdict_counts.LANGUAGE_DEFECT`
+- `ai_judge_used=false`
+- `judge_model_calls=0`
+- `zero_judge_tokens=true`
+
+This grader never rewrites the saved reply, facts, recommendations, evidence, or execution state. It hashes and returns the original reply for traceability. An AI semantic judge remains an optional future advisory signal only and is disabled by default in `config/lab.toml`.
+
+A low-token workflow is therefore:
+
+1. run a small live ROBERTA sample once;
+2. save the JSONL responses;
+3. run `roberta-eval quality` repeatedly offline as rules and regressions improve;
+4. use the deterministic fixture/generator/stress suites for large-volume testing without model calls;
+5. use an AI judge only if deliberately enabled for a difficult subjective review.
 
 ## Live evidence-backed evaluation
 
@@ -71,7 +102,7 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
-Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new evaluation campaigns, grading/diagnostics, trend analysis, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect.
+Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new evaluation campaigns, grading/diagnostics, trend analysis, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53 is a bounded tooling/setup change and does not by itself resume those paused live campaigns.
 
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
