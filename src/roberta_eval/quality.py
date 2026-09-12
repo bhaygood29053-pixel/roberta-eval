@@ -5,7 +5,9 @@ import re
 from pathlib import Path
 from typing import Any, Protocol
 
-QUALITY_GRADER_VERSION = "roberta_human_quality/v1"
+from .human_language import grade_human_language_record, human_language_summary
+
+QUALITY_GRADER_VERSION = "roberta_human_quality/v2"
 
 
 class SemanticJudge(Protocol):
@@ -159,6 +161,7 @@ def grade_human_quality(record: dict[str, Any]) -> dict[str, Any]:
         "internal_contract_hygiene": leakage_score,
     }
     overall = round(sum(scores.values()) / len(scores), 2)
+    human_v2 = grade_human_language_record(record)
     return {
         "quality_grader_version": QUALITY_GRADER_VERSION,
         "advisory_only": True,
@@ -173,6 +176,10 @@ def grade_human_quality(record: dict[str, Any]) -> dict[str, Any]:
             "leaked_internal_terms": leaked_terms,
             "reply_length": len(reply),
         },
+        "human_v2": human_v2,
+        "ai_judge_used": False,
+        "judge_model_calls": 0,
+        "zero_judge_tokens": True,
     }
 
 
@@ -187,6 +194,7 @@ def human_quality_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         average = round(
             sum(float(item["overall_score"]) for item in results) / len(results), 2
         )
+    language_results = [item["human_v2"] for item in results]
     return {
         "quality_grader_version": QUALITY_GRADER_VERSION,
         "advisory_only": True,
@@ -196,6 +204,10 @@ def human_quality_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         "internal_leakage_count": sum(
             1 for item in results if item["signals"]["leaked_internal_terms"]
         ),
+        "human_v2": human_language_summary(language_results),
+        "ai_judge_used": False,
+        "judge_model_calls": 0,
+        "zero_judge_tokens": True,
     }
 
 

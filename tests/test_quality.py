@@ -63,6 +63,7 @@ def test_internal_contract_leakage_is_detected() -> None:
     )
     assert result["scores"]["internal_contract_hygiene"] == 0
     assert "execution_authorized" in result["signals"]["leaked_internal_terms"]
+    assert result["human_v2"]["verdict"] == "LANGUAGE_DEFECT"
 
 
 def test_repeated_sentences_are_penalized() -> None:
@@ -72,12 +73,26 @@ def test_repeated_sentences_are_penalized() -> None:
     assert result["scores"]["non_repetition"] < 100
 
 
-def test_summary_is_explicitly_advisory() -> None:
+def test_quality_grader_runs_human_v2_without_ai_judge() -> None:
+    result = grade_human_quality(
+        _record("I can't confirm the current price yet, so I'd wait for fresher information.")
+    )
+    assert result["human_v2"]["verdict"] == "PASS"
+    assert result["ai_judge_used"] is False
+    assert result["judge_model_calls"] == 0
+    assert result["zero_judge_tokens"] is True
+
+
+def test_summary_is_explicitly_advisory_and_zero_token() -> None:
     results = [
         grade_human_quality(_record("LABX evidence is available and the price is $0.01.")),
-        grade_human_quality(_record("")),
+        grade_human_quality(_record("The CMIS freshness state is UNKNOWN.")),
     ]
     summary = human_quality_summary(results)
     assert summary["advisory_only"] is True
     assert summary["factual_authority"] is False
     assert summary["result_count"] == 2
+    assert summary["human_v2"]["verdict_counts"]["LANGUAGE_DEFECT"] == 1
+    assert summary["ai_judge_used"] is False
+    assert summary["judge_model_calls"] == 0
+    assert summary["zero_judge_tokens"] is True

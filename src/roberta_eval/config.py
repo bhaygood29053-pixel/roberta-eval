@@ -30,3 +30,15 @@ def validate_config(config: dict) -> None:
 
     if evaluation.get("allow_ai_judge_as_deterministic_authority") is not False:
         raise ValueError("AI judge cannot be deterministic authority")
+
+    if evaluation.get("human_language_deterministic_enabled") is not True:
+        raise ValueError("Deterministic Human language grading must remain enabled")
+
+    if evaluation.get("ai_semantic_judge_enabled") is not False:
+        raise ValueError("AI semantic judge must be disabled by default")
+
+    if evaluation.get("human_language_default_depth") != "normal":
+        raise ValueError("Human language default depth must remain normal")
+
+    if evaluation.get("human_language_deep_dive_technical_allowed") is not True:
+        raise ValueError("Deep Dive technical detail must remain explicitly allowed")
