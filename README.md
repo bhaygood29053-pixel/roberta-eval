@@ -102,6 +102,32 @@ The trend engine reuses the accepted deterministic Human v2 grader and reports n
 
 The trend engine is observational only. It does not rewrite responses, promote defects automatically, change ROBERTA/Scout/CMIS behavior, or authorize execution. The existing generic `roberta-eval trends` history command remains separate and compatible.
 
+## Human v2 Evaluation Dashboard
+
+The existing Evaluation Dashboard can optionally consume a previous and current saved replay corpus. With no Human replay inputs, the dashboard behaves exactly as before.
+
+```bash
+roberta-eval dashboard \
+  --human-previous /tmp/roberta-runs-before \
+  --human-current /tmp/roberta-runs-after \
+  --json /tmp/roberta-dashboard.json \
+  --markdown /tmp/roberta-dashboard.md
+```
+
+`--human-previous` and `--human-current` must be supplied together. When present, the dashboard reuses the accepted zero-token Human trend engine and shows:
+
+- current Human PASS and language-defect rates;
+- improvement/regression plus percentage-point movement;
+- worst current Human-facing services;
+- recurring Human-language defects;
+- improved and regressed services;
+- the next deterministic Human defect to fix;
+- `judge_model_calls=0`, `external_calls=0`, and `zero_judge_tokens=true`.
+
+The next-priority rule is deterministic: select the highest-rate recurring current defect first; if none exists, select the highest-rate NEW current defect. The dashboard pairs that defect with the worst current service carrying defects when available. If the current corpus has no Human v2 language defects, it reports no next priority instead of inventing one.
+
+The dashboard remains presentation-only and advisory for Human-language quality. It does not promote defects, mutate production behavior, create evidence, or authorize execution.
+
 ## Live evidence-backed evaluation
 
 Synthetic fixture cases and live ROBERTA cases are intentionally separate.
@@ -149,7 +175,7 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
-Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new live evaluation campaigns, live grading/diagnostics, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53, LAB #55, and LAB #57 are bounded offline tooling changes and do not by themselves resume those paused live campaigns.
+Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new live evaluation campaigns, live grading/diagnostics, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53, LAB #55, LAB #57, and LAB #59 are bounded offline tooling changes and do not by themselves resume those paused live campaigns.
 
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
