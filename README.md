@@ -75,6 +75,33 @@ A low-token workflow is therefore:
 5. use the deterministic fixture/generator/stress suites for large-volume testing without model calls;
 6. use an AI judge only if deliberately enabled for a difficult subjective review.
 
+## Zero-token Human defect trends
+
+Compare two saved run files or replay directories without generating another ROBERTA answer and without calling DeepSeek:
+
+```bash
+roberta-eval-human-trends \
+  --previous /tmp/roberta-runs-before \
+  --current /tmp/roberta-runs-after \
+  --previous-id before-human-v2 \
+  --current-id after-human-v2 \
+  --json /tmp/roberta-human-trend.json \
+  --markdown /tmp/roberta-human-trend.md
+```
+
+The trend engine reuses the accepted deterministic Human v2 grader and reports normalized previous → current movement, including:
+
+- overall `LANGUAGE_DEFECT` and PASS rates plus percentage-point deltas;
+- worst current Human-facing services ranked by defect rate;
+- per-service and per-response-depth improvement/regression;
+- per-failure-code rates;
+- NEW, RECURRENT, and RESOLVED defect codes;
+- recurring current defects ranked by current rate/count;
+- unequal corpus sizes handled through normalized rates rather than raw-count-only conclusions;
+- `ai_judge_used=false`, `judge_model_calls=0`, `external_calls=0`, and `zero_judge_tokens=true`.
+
+The trend engine is observational only. It does not rewrite responses, promote defects automatically, change ROBERTA/Scout/CMIS behavior, or authorize execution. The existing generic `roberta-eval trends` history command remains separate and compatible.
+
 ## Live evidence-backed evaluation
 
 Synthetic fixture cases and live ROBERTA cases are intentionally separate.
@@ -122,7 +149,7 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
-Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new evaluation campaigns, grading/diagnostics, trend analysis, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53 and LAB #55 are bounded tooling/setup changes and do not by themselves resume those paused live campaigns.
+Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new live evaluation campaigns, live grading/diagnostics, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53, LAB #55, and LAB #57 are bounded offline tooling changes and do not by themselves resume those paused live campaigns.
 
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
