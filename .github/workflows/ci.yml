@@ -56,6 +56,41 @@ jobs:
       - name: Human quality advisory smoke
         run: roberta-eval quality --input /tmp/roberta-run.jsonl --output /tmp/roberta-quality.jsonl
 
+      - name: Human checkpoint history config
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_checkpoint_history import (
+              human_checkpoint_history_summary,
+              load_human_checkpoint_history,
+          )
+          summary = human_checkpoint_history_summary(load_human_checkpoint_history())
+          assert summary["checkpoint_count"] == 0
+          assert summary["judge_model_calls"] == 0
+          assert summary["external_calls"] == 0
+          PY
+
+      - name: Human checkpoint acceptance smoke
+        run: |
+          cp config/human_checkpoint_history.json /tmp/human-checkpoint-history.json
+          roberta-eval-human-checkpoint \
+            --input /tmp/roberta-run.jsonl \
+            --checkpoint-id ci-human-001 \
+            --history /tmp/human-checkpoint-history.json \
+            --accept
+          python - <<'PY'
+          from pathlib import Path
+          from roberta_eval.human_checkpoint_history import (
+              human_checkpoint_history_summary,
+              load_human_checkpoint_history,
+          )
+          history = load_human_checkpoint_history(Path("/tmp/human-checkpoint-history.json"))
+          summary = human_checkpoint_history_summary(history)
+          assert summary["checkpoint_count"] == 1
+          assert summary["latest_checkpoint_id"] == "ci-human-001"
+          assert summary["raw_responses_stored"] is False
+          assert summary["local_paths_stored"] is False
+          PY
+
       - name: Adversarial suite
         run: roberta-eval adversarial --write /tmp/roberta-adversarial-suite.jsonl
 
