@@ -50,28 +50,19 @@ def write_human_checkpoint_history(path: Path, history: dict[str, Any]) -> None:
     path.write_text(json.dumps(history, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _corpus_fingerprint(quality_results: list[dict[str, Any]]) -> str:
-    rows = []
-    for item in quality_results:
-        human = item["human_v2"]
-        rows.append(
-            {
-                "record_id": item.get("record_id"),
-                "case_id": item.get("case_id"),
-                "service": item.get("service"),
-                "response_depth": human.get("response_depth"),
-                "response_sha256": human.get("response_sha256"),
-            }
-        )
-    rows.sort(
+def _corpus_fingerprint(records: list[dict[str, Any]]) -> str:
+    sanitized: list[dict[str, Any]] = []
+    for record in records:
+        row = {key: value for key, value in record.items() if key != "_source_path"}
+        sanitized.append(row)
+    sanitized.sort(
         key=lambda row: (
             str(row.get("record_id") or ""),
             str(row.get("case_id") or ""),
             str(row.get("service") or ""),
-            str(row.get("response_sha256") or ""),
         )
     )
-    payload = json.dumps(rows, sort_keys=True, separators=(",", ":"))
+    payload = json.dumps(sanitized, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -93,7 +84,7 @@ def build_human_checkpoint(
     )
     return {
         "checkpoint_id": checkpoint_id,
-        "corpus_sha256": _corpus_fingerprint(quality_results),
+        "corpus_sha256": _corpus_fingerprint(records),
         "snapshot": snapshot,
         "quality": {
             "result_count": int(quality["result_count"]),
