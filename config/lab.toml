@@ -8,3 +8,7 @@ production_mutation_allowed = false
 prefer_deterministic_ground_truth = true
 preserve_confirmed_regressions = true
 allow_ai_judge_as_deterministic_authority = false
+human_language_deterministic_enabled = true
+ai_semantic_judge_enabled = false
+human_language_default_depth = "normal"
+human_language_deep_dive_technical_allowed = true
