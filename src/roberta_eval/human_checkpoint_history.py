@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from copy import deepcopy
@@ -242,3 +243,28 @@ def accept_human_checkpoint(
         "external_calls": 0,
         "zero_judge_tokens": True,
     }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="roberta-eval-human-checkpoint")
+    parser.add_argument("--input", required=True, help="saved ROBERTA run file/directory")
+    parser.add_argument("--checkpoint-id", required=True, help="immutable accepted checkpoint ID")
+    parser.add_argument("--history", default=None, help="optional checkpoint-history JSON path")
+    parser.add_argument(
+        "--accept",
+        action="store_true",
+        required=True,
+        help="explicitly accept and persist this checkpoint",
+    )
+    args = parser.parse_args(argv)
+    result = accept_human_checkpoint(
+        Path(args.input),
+        checkpoint_id=args.checkpoint_id,
+        history_path=Path(args.history) if args.history else None,
+    )
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
