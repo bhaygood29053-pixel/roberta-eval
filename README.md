@@ -104,7 +104,9 @@ The trend engine is observational only. It does not rewrite responses, promote d
 
 ## Human v2 Evaluation Dashboard
 
-The existing Evaluation Dashboard can optionally consume a previous and current saved replay corpus. With no Human replay inputs, the dashboard behaves exactly as before.
+The Evaluation Dashboard can consume an explicit previous/current replay pair, and it can now automatically use accepted Human v2 checkpoint history.
+
+Manual replay comparison remains available:
 
 ```bash
 roberta-eval dashboard \
@@ -114,7 +116,11 @@ roberta-eval dashboard \
   --markdown /tmp/roberta-dashboard.md
 ```
 
-`--human-previous` and `--human-current` must be supplied together. When present, the dashboard reuses the accepted zero-token Human trend engine and shows:
+`--human-previous` and `--human-current` must be supplied together. When present, that explicit replay pair overrides accepted checkpoint history for the Human comparison.
+
+When no explicit Human replay pair is supplied, the dashboard reads `config/human_checkpoint_history.json`. If at least two accepted checkpoints exist, it automatically compares the latest checkpoint with the previous accepted checkpoint. With zero or one accepted checkpoint, it does not invent a trend.
+
+The dashboard shows:
 
 - current Human PASS and language-defect rates;
 - improvement/regression plus percentage-point movement;
@@ -122,11 +128,39 @@ roberta-eval dashboard \
 - recurring Human-language defects;
 - improved and regressed services;
 - the next deterministic Human defect to fix;
+- the accepted checkpoint IDs used for comparison;
 - `judge_model_calls=0`, `external_calls=0`, and `zero_judge_tokens=true`.
 
 The next-priority rule is deterministic: select the highest-rate recurring current defect first; if none exists, select the highest-rate NEW current defect. The dashboard pairs that defect with the worst current service carrying defects when available. If the current corpus has no Human v2 language defects, it reports no next priority instead of inventing one.
 
 The dashboard remains presentation-only and advisory for Human-language quality. It does not promote defects, mutate production behavior, create evidence, or authorize execution.
+
+## Persistent accepted Human v2 checkpoints
+
+Scratch replays do not become baselines automatically. Persisting a Human v2 checkpoint requires an explicit acceptance action:
+
+```bash
+roberta-eval-human-checkpoint \
+  --input /tmp/roberta-runs-after \
+  --checkpoint-id human-v2-2026-09-12-a \
+  --accept
+```
+
+The default store is `config/human_checkpoint_history.json`. A custom history path can be used for experiments/tests:
+
+```bash
+roberta-eval-human-checkpoint \
+  --input /tmp/roberta-runs-after \
+  --checkpoint-id experiment-a \
+  --history /tmp/human-checkpoints.json \
+  --accept
+```
+
+Accepted checkpoint history stores only aggregate Human v2 snapshot metrics, an advisory quality summary, ordering metadata, and a deterministic corpus SHA-256. It does **not** store raw ROBERTA responses or local replay paths.
+
+Checkpoint IDs are immutable. Repeating the same checkpoint ID with the same corpus is idempotent; reusing an existing checkpoint ID for different corpus content fails closed. Once two checkpoints have been explicitly accepted, the ordinary `roberta-eval dashboard` command automatically compares the latest two without requiring replay-directory arguments.
+
+This checkpoint path remains zero-token: no DeepSeek/LLM judge, provider, RPC, or HTTP call is introduced by checkpoint creation or dashboard comparison.
 
 ## Live evidence-backed evaluation
 
@@ -175,7 +209,7 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
-Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new live evaluation campaigns, live grading/diagnostics, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53, LAB #55, LAB #57, and LAB #59 are bounded offline tooling changes and do not by themselves resume those paused live campaigns.
+Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new live evaluation campaigns, live grading/diagnostics, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53, LAB #55, LAB #57, LAB #59, and LAB #61 are bounded offline tooling changes and do not by themselves resume those paused live campaigns.
 
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
