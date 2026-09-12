@@ -15,6 +15,7 @@ from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .dashboard import build_dashboard, write_dashboard_json, write_dashboard_markdown
 from .generator import generate_cases, generated_summary, write_generated
 from .github_promotion import build_issue_proposals, load_jsonl as load_proposal_jsonl, proposal_summary, write_proposals
+from .human_trends import build_human_trend_report
 from .live import LIVE_TELEMETRY_VERSION, grade_live_records, live_case_summary, live_grader_summary, materialize_live_cases, write_live_cases, write_live_grades
 from .live_diagnostics import diagnose_live_grades, load_live_grades, write_diagnostics_json, write_diagnostics_markdown
 from .quality import grade_human_quality_records, human_quality_summary, write_quality
@@ -102,36 +103,20 @@ def run_suite(mode: str, limit: int | None, output: str | None, target: str | No
 
 
 def live_plan_suite(limit: int | None, output: str | None) -> int:
-    cases = select_cases(
-        materialize_live_cases(),
-        limit=limit,
-        strategy="balanced",
-    )
+    cases = select_cases(materialize_live_cases(), limit=limit, strategy="balanced")
     if output:
         write_live_cases(Path(output), cases)
     print(json.dumps(live_case_summary(cases), indent=2, sort_keys=True))
     return 0
 
 
-def live_run_suite(
-    limit: int | None,
-    output: str | None,
-    target: str | None,
-    run_id: str,
-) -> int:
+def live_run_suite(limit: int | None, output: str | None, target: str | None, run_id: str) -> int:
     config = load_config()
     selected_target = target or config["lab"]["default_target"]
-    cases = select_cases(
-        materialize_live_cases(),
-        limit=limit,
-        strategy="balanced",
-    )
+    cases = select_cases(materialize_live_cases(), limit=limit, strategy="balanced")
     records = run_cases(
         cases,
-        transport=HttpRobertaTransport(
-            selected_target,
-            evaluation_mode=LIVE_TELEMETRY_VERSION,
-        ),
+        transport=HttpRobertaTransport(selected_target, evaluation_mode=LIVE_TELEMETRY_VERSION),
         run_id=run_id,
         target=selected_target,
     )
@@ -275,12 +260,36 @@ def trend_suite() -> int:
     return 0
 
 
-def dashboard_suite(json_output: str | None, markdown_output: str | None) -> int:
+def dashboard_suite(
+    json_output: str | None,
+    markdown_output: str | None,
+    human_previous: str | None = None,
+    human_current: str | None = None,
+) -> int:
+    if bool(human_previous) != bool(human_current):
+        raise ValueError("--human-previous and --human-current must be supplied together")
+
     qualification = run_stress_qualification(limit=2500)
+    human_trend_report = None
+    current_quality = None
+    if human_previous and human_current:
+        human_trend_report = build_human_trend_report(
+            Path(human_previous),
+            Path(human_current),
+            previous_id="dashboard-previous",
+            current_id="dashboard-current",
+        )
+        current_records = load_run_jsonl(Path(human_current))
+        current_quality = human_quality_summary(
+            grade_human_quality_records(current_records)
+        )
+
     view = build_dashboard(
         qualification=qualification,
+        quality=current_quality,
         regression_memory=memory_summary(load_memory()),
         trend_history=history_summary(load_history()),
+        human_trend_report=human_trend_report,
     )
     if json_output:
         write_dashboard_json(Path(json_output), view)
@@ -292,10 +301,7 @@ def dashboard_suite(json_output: str | None, markdown_output: str | None) -> int
 
 def proposal_suite(clusters_path: str, confirmed: list[str], output: str | None) -> int:
     clusters = load_proposal_jsonl(Path(clusters_path))
-    proposals = build_issue_proposals(
-        clusters,
-        confirmed_cluster_ids=set(confirmed),
-    )
+    proposals = build_issue_proposals(clusters, confirmed_cluster_ids=set(confirmed))
     if output:
         write_proposals(Path(output), proposals)
     print(json.dumps(proposal_summary(proposals), indent=2, sort_keys=True))
@@ -383,6 +389,8 @@ def main() -> int:
     dashboard_parser = subparsers.add_parser("dashboard", help="render current Laboratory dashboard")
     dashboard_parser.add_argument("--json", dest="json_output", default=None)
     dashboard_parser.add_argument("--markdown", dest="markdown_output", default=None)
+    dashboard_parser.add_argument("--human-previous", default=None, help="previous saved ROBERTA run file/directory")
+    dashboard_parser.add_argument("--human-current", default=None, help="current saved ROBERTA run file/directory")
     proposal_parser = subparsers.add_parser("defect-proposals", help="build reviewable GitHub issue proposals")
     proposal_parser.add_argument("--clusters", required=True)
     proposal_parser.add_argument("--confirm", action="append", default=[])
@@ -395,55 +403,30 @@ def main() -> int:
     scale_parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
-    if args.command == "doctor":
-        return doctor()
-    if args.command == "capabilities":
-        return capabilities()
-    if args.command == "taxonomy":
-        return taxonomy()
-    if args.command == "corpus":
-        return corpus(args.output)
-    if args.command == "run":
-        return run_suite(args.mode, args.limit, args.output, args.target, args.run_id, args.selection)
-    if args.command == "live-plan":
-        return live_plan_suite(args.limit, args.output)
-    if args.command == "live-run":
-        return live_run_suite(args.limit, args.output, args.target, args.run_id)
-    if args.command == "live-grade":
-        return live_grade_suite(args.input, args.output)
-    if args.command == "live-diagnose":
-        return live_diagnose_suite(args.input, args.json_output, args.markdown_output)
-    if args.command == "grade":
-        return grade_suite(args.input, args.output, args.limit)
-    if args.command == "generate":
-        return generate_suite(args.output)
-    if args.command == "stress":
-        return stress_suite(args.limit, args.json_output, args.markdown_output)
-    if args.command == "quality":
-        return quality_suite(args.input, args.output)
-    if args.command == "adversarial":
-        return adversarial_suite(args.output)
-    if args.command == "conversations":
-        return conversation_suite(args.output)
-    if args.command == "classify":
-        return classify_suite(args.input, args.output)
-    if args.command == "localize":
-        return localize_suite(args.input, args.output)
-    if args.command == "cluster":
-        return cluster_suite(args.findings, args.localizations, args.output)
-    if args.command == "regressions":
-        return regression_memory_suite()
-    if args.command == "trends":
-        return trend_suite()
-    if args.command == "dashboard":
-        return dashboard_suite(args.json_output, args.markdown_output)
-    if args.command == "defect-proposals":
-        return proposal_suite(args.clusters, args.confirm, args.output)
-    if args.command == "release-qualify":
-        return release_qualification_suite(args.scope, args.output)
-    if args.command == "scale":
-        return scale_suite(args.limit, args.output)
-
+    if args.command == "doctor": return doctor()
+    if args.command == "capabilities": return capabilities()
+    if args.command == "taxonomy": return taxonomy()
+    if args.command == "corpus": return corpus(args.output)
+    if args.command == "run": return run_suite(args.mode, args.limit, args.output, args.target, args.run_id, args.selection)
+    if args.command == "live-plan": return live_plan_suite(args.limit, args.output)
+    if args.command == "live-run": return live_run_suite(args.limit, args.output, args.target, args.run_id)
+    if args.command == "live-grade": return live_grade_suite(args.input, args.output)
+    if args.command == "live-diagnose": return live_diagnose_suite(args.input, args.json_output, args.markdown_output)
+    if args.command == "grade": return grade_suite(args.input, args.output, args.limit)
+    if args.command == "generate": return generate_suite(args.output)
+    if args.command == "stress": return stress_suite(args.limit, args.json_output, args.markdown_output)
+    if args.command == "quality": return quality_suite(args.input, args.output)
+    if args.command == "adversarial": return adversarial_suite(args.output)
+    if args.command == "conversations": return conversation_suite(args.output)
+    if args.command == "classify": return classify_suite(args.input, args.output)
+    if args.command == "localize": return localize_suite(args.input, args.output)
+    if args.command == "cluster": return cluster_suite(args.findings, args.localizations, args.output)
+    if args.command == "regressions": return regression_memory_suite()
+    if args.command == "trends": return trend_suite()
+    if args.command == "dashboard": return dashboard_suite(args.json_output, args.markdown_output, args.human_previous, args.human_current)
+    if args.command == "defect-proposals": return proposal_suite(args.clusters, args.confirm, args.output)
+    if args.command == "release-qualify": return release_qualification_suite(args.scope, args.output)
+    if args.command == "scale": return scale_suite(args.limit, args.output)
     return 2
 
 
