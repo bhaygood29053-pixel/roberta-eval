@@ -15,6 +15,7 @@ dev = ["pytest>=8"]
 
 [project.scripts]
 roberta-eval = "roberta_eval.cli:main"
+roberta-eval-human-trends = "roberta_eval.human_trends:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
