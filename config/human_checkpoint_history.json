@@ -1,0 +1,14 @@
+{
+  "checkpoints": [],
+  "history_version": "roberta_human_language_checkpoint_history/v1",
+  "policy": {
+    "acceptance": "explicit_only",
+    "advisory_only": true,
+    "checkpoint_id_reuse": "idempotent_same_corpus_only",
+    "comparison": "latest_two_accepted",
+    "execution_authorized": false,
+    "factual_authority": false,
+    "local_paths_stored": false,
+    "raw_responses_stored": false
+  }
+}
