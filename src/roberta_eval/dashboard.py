@@ -4,6 +4,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .human_checkpoint_history import (
+    human_checkpoint_history_summary,
+    latest_human_checkpoint_report,
+    load_human_checkpoint_history,
+)
+
 DASHBOARD_VERSION = "roberta_evaluation_dashboard/v1"
 
 
@@ -147,6 +153,14 @@ def build_dashboard(
     human_trend_report: dict[str, Any] | None = None,
     human_checkpoint_history: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    if human_checkpoint_history is None:
+        accepted_history = load_human_checkpoint_history()
+        human_checkpoint_history = human_checkpoint_history_summary(accepted_history)
+        if human_trend_report is None:
+            human_trend_report = latest_human_checkpoint_report(accepted_history)
+        if quality is None and accepted_history["checkpoints"]:
+            quality = accepted_history["checkpoints"][-1]["quality"]
+
     verdicts = qualification["grading"]["verdict_counts"]
     coverage = qualification["coverage"]
     return {
