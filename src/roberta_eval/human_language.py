@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -202,6 +203,7 @@ def grade_human_language_record(
         "record_id": record.get("record_id"),
         "case_id": record.get("case_id"),
         "service": record.get("service"),
+        "source_path": record.get("_source_path"),
         "response_depth": depth,
         "verdict": verdict,
         "failures": failures,
@@ -229,21 +231,57 @@ def grade_human_language_records(
     ]
 
 
+def _verdict_bucket() -> dict[str, int]:
+    return {"PASS": 0, "LANGUAGE_DEFECT": 0}
+
+
 def human_language_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
-    counts = {"PASS": 0, "LANGUAGE_DEFECT": 0}
+    counts = _verdict_bucket()
     by_depth: dict[str, dict[str, int]] = {}
+    by_service: dict[str, dict[str, int]] = {}
+    failure_codes: Counter[str] = Counter()
+    response_hashes: Counter[str] = Counter()
+    source_paths: set[str] = set()
+
     for result in results:
         verdict = str(result["verdict"])
         counts[verdict] = counts.get(verdict, 0) + 1
+
         depth = str(result["response_depth"])
-        bucket = by_depth.setdefault(depth, {"PASS": 0, "LANGUAGE_DEFECT": 0})
-        bucket[verdict] = bucket.get(verdict, 0) + 1
+        depth_bucket = by_depth.setdefault(depth, _verdict_bucket())
+        depth_bucket[verdict] = depth_bucket.get(verdict, 0) + 1
+
+        service = str(result.get("service") or "unknown")
+        service_bucket = by_service.setdefault(service, _verdict_bucket())
+        service_bucket[verdict] = service_bucket.get(verdict, 0) + 1
+
+        for failure in result.get("failures", []):
+            code = failure.get("code") if isinstance(failure, dict) else None
+            if isinstance(code, str) and code:
+                failure_codes[code] += 1
+
+        response_hash = result.get("response_sha256")
+        if isinstance(response_hash, str):
+            response_hashes[response_hash] += 1
+
+        source_path = result.get("source_path")
+        if isinstance(source_path, str) and source_path:
+            source_paths.add(source_path)
+
+    unique_response_count = len(response_hashes)
+    duplicate_response_record_count = sum(max(0, count - 1) for count in response_hashes.values())
 
     return {
         "human_language_grader_version": HUMAN_LANGUAGE_GRADER_VERSION,
         "result_count": len(results),
         "verdict_counts": counts,
-        "by_response_depth": by_depth,
+        "by_response_depth": dict(sorted(by_depth.items())),
+        "by_service": dict(sorted(by_service.items())),
+        "failure_code_counts": dict(sorted(failure_codes.items())),
+        "source_file_count": len(source_paths),
+        "source_files": sorted(source_paths),
+        "unique_response_count": unique_response_count,
+        "duplicate_response_record_count": duplicate_response_record_count,
         "deterministic": True,
         "advisory_only": True,
         "factual_authority": False,
