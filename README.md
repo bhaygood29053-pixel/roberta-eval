@@ -37,23 +37,43 @@ roberta-eval quality \
   --output /tmp/roberta-human-quality.jsonl
 ```
 
-The summary includes:
+Grade an entire saved-run directory recursively with the same command:
+
+```bash
+roberta-eval quality \
+  --input /tmp/roberta-saved-runs \
+  --output /tmp/roberta-human-quality-all.jsonl
+```
+
+Directory replay discovers only JSONL files containing `roberta_eval_run_record/v1` records. Old grade, diagnostic, and other JSONL outputs in the same tree are not re-ingested. Mixed run/non-run files fail closed.
+
+The Human v2 summary includes:
 
 - `human_v2.verdict_counts.PASS`
 - `human_v2.verdict_counts.LANGUAGE_DEFECT`
+- `human_v2.by_service`
+- `human_v2.by_response_depth`
+- `human_v2.failure_code_counts`
+- `human_v2.source_file_count`
+- `human_v2.unique_response_count`
+- `human_v2.duplicate_response_record_count`
 - `ai_judge_used=false`
 - `judge_model_calls=0`
+- `external_calls=0`
 - `zero_judge_tokens=true`
+
+Duplicate responses are still graded; they are counted explicitly rather than silently removed. That makes repeated wording defects visible while preserving the exact saved-run history.
 
 This grader never rewrites the saved reply, facts, recommendations, evidence, or execution state. It hashes and returns the original reply for traceability. An AI semantic judge remains an optional future advisory signal only and is disabled by default in `config/lab.toml`.
 
 A low-token workflow is therefore:
 
 1. run a small live ROBERTA sample once;
-2. save the JSONL responses;
-3. run `roberta-eval quality` repeatedly offline as rules and regressions improve;
-4. use the deterministic fixture/generator/stress suites for large-volume testing without model calls;
-5. use an AI judge only if deliberately enabled for a difficult subjective review.
+2. save the JSONL responses in a replay directory;
+3. run `roberta-eval quality --input <directory>` repeatedly offline as rules and regressions improve;
+4. use the service/depth/failure-code summary to identify recurring Human-language defects;
+5. use the deterministic fixture/generator/stress suites for large-volume testing without model calls;
+6. use an AI judge only if deliberately enabled for a difficult subjective review.
 
 ## Live evidence-backed evaluation
 
@@ -102,7 +122,7 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
-Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new evaluation campaigns, grading/diagnostics, trend analysis, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53 is a bounded tooling/setup change and does not by itself resume those paused live campaigns.
+Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new evaluation campaigns, grading/diagnostics, trend analysis, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53 and LAB #55 are bounded tooling/setup changes and do not by themselves resume those paused live campaigns.
 
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 GRADER_VERSION = "roberta_deterministic_grader/v1"
+RUN_RECORD_VERSION = "roberta_eval_run_record/v1"
 
 
 def _resolve(root: dict[str, Any], path: str) -> tuple[bool, Any]:
@@ -199,12 +200,56 @@ def grader_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _load_run_file(path: Path) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        value = json.loads(line)
+        if not isinstance(value, dict):
+            raise ValueError(f"{path}:{line_number}: run record must be a JSON object")
+        record = dict(value)
+        record.setdefault("_source_path", str(path))
+        records.append(record)
+    return records
+
+
 def load_run_jsonl(path: Path) -> list[dict[str, Any]]:
-    return [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
+    """Load one run JSONL file or recursively replay a directory of saved runs.
+
+    Directory replay only accepts files containing `roberta_eval_run_record/v1`
+    records. This prevents prior grade/diagnostic JSONL outputs from being silently
+    re-ingested when results live beside saved run files.
+    """
+
+    if path.is_file():
+        return _load_run_file(path)
+    if not path.exists():
+        raise FileNotFoundError(path)
+    if not path.is_dir():
+        raise ValueError(f"run input must be a JSONL file or directory: {path}")
+
+    records: list[dict[str, Any]] = []
+    accepted_files = 0
+    for candidate in sorted(path.rglob("*.jsonl")):
+        if not candidate.is_file():
+            continue
+        rows = _load_run_file(candidate)
+        if not rows:
+            continue
+        run_rows = [row for row in rows if row.get("record_version") == RUN_RECORD_VERSION]
+        if not run_rows:
+            continue
+        if len(run_rows) != len(rows):
+            raise ValueError(
+                f"{candidate}: mixed JSONL contains run records and non-run records"
+            )
+        records.extend(run_rows)
+        accepted_files += 1
+
+    if accepted_files == 0:
+        raise ValueError(f"no {RUN_RECORD_VERSION} JSONL run files found under {path}")
+    return records
 
 
 def write_grades(path: Path, results: list[dict[str, Any]]) -> None:
