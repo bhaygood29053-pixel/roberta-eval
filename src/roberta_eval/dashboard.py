@@ -66,12 +66,26 @@ def _human_priority(human_trend_report: dict[str, Any] | None) -> dict[str, Any]
     return selected
 
 
+def _history_fields(history: dict[str, Any] | None) -> dict[str, Any]:
+    history = history or {}
+    return {
+        "accepted_checkpoint_count": int(history.get("checkpoint_count", 0)),
+        "latest_checkpoint_id": history.get("latest_checkpoint_id"),
+        "previous_checkpoint_id": history.get("previous_checkpoint_id"),
+        "checkpoint_comparison_available": bool(history.get("comparison_available", False)),
+    }
+
+
 def _human_section(
     human_trend_report: dict[str, Any] | None,
+    human_checkpoint_history: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    history_fields = _history_fields(human_checkpoint_history)
     if not human_trend_report:
         return {
             "available": False,
+            "source_mode": None,
+            **history_fields,
             "advisory_only": True,
             "factual_authority": False,
             "ai_judge_used": False,
@@ -88,6 +102,12 @@ def _human_section(
     recurring = comparison.get("recurring_current_defects", [])
     return {
         "available": True,
+        "source_mode": human_trend_report.get("source_mode", "explicit_replay_pair"),
+        **history_fields,
+        "comparison_checkpoint_ids": {
+            "previous": comparison.get("previous_snapshot_id"),
+            "current": comparison.get("current_snapshot_id"),
+        },
         "current": {
             "result_count": current["result_count"],
             "pass_count": current["pass_count"],
@@ -125,6 +145,7 @@ def build_dashboard(
     trend_history: dict[str, Any] | None = None,
     trend_comparison: dict[str, Any] | None = None,
     human_trend_report: dict[str, Any] | None = None,
+    human_checkpoint_history: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     verdicts = qualification["grading"]["verdict_counts"]
     coverage = qualification["coverage"]
@@ -152,7 +173,7 @@ def build_dashboard(
                 quality.get("average_overall_score") if quality else None
             ),
         },
-        "human_v2": _human_section(human_trend_report),
+        "human_v2": _human_section(human_trend_report, human_checkpoint_history),
         "defects": {
             "cluster_count": int((clusters or {}).get("cluster_count", 0)),
             "actionable_product_cluster_count": int(
@@ -214,11 +235,15 @@ def render_markdown(view: dict[str, Any]) -> str:
     if human.get("available"):
         current = human["current"]
         movement = human["movement"]
+        ids = human.get("comparison_checkpoint_ids", {})
         lines.extend(
             [
                 "",
                 "## Human ROBERTA v2 language intelligence",
                 "",
+                f"- Source: {human.get('source_mode')}",
+                f"- Comparison: {ids.get('previous')} → {ids.get('current')}",
+                f"- Accepted checkpoints stored: {human.get('accepted_checkpoint_count', 0)}",
                 f"- Current records: {current['result_count']}",
                 f"- Human PASS rate: {_pct(current['pass_rate'])}",
                 f"- Language defect rate: {_pct(current['defect_rate'])}",
@@ -269,7 +294,21 @@ def render_markdown(view: dict[str, Any]) -> str:
                 f"- `{priority['failure_code']}` ({priority['recurrence']}){service_text}: {_pct(priority['current_rate'])} current rate, {priority['current_count']} occurrences."
             )
         else:
-            lines.append("- none — no current Human v2 language defect is present in the supplied replay corpus.")
+            lines.append("- none — no current Human v2 language defect is present in the current accepted/replay corpus.")
+    elif int(human.get("accepted_checkpoint_count", 0)) > 0:
+        lines.extend(
+            [
+                "",
+                "## Human ROBERTA v2 checkpoint history",
+                "",
+                f"- Accepted checkpoints stored: {human['accepted_checkpoint_count']}",
+                f"- Latest checkpoint: {human.get('latest_checkpoint_id') or 'none'}",
+                "- Trend comparison: not enough accepted checkpoints yet; two are required.",
+                "- Judge model calls: 0",
+                "- External calls: 0",
+                "- Zero judge tokens: true",
+            ]
+        )
 
     lines.extend(
         [
