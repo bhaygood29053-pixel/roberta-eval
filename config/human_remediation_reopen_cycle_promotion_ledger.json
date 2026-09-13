@@ -1,0 +1,12 @@
+{
+  "ledger_version": "roberta_human_remediation_reopen_cycle_promotion_ledger/v1",
+  "policy": {
+    "automatic_issue_creation": false,
+    "duplicate_cycle_creation_prevented": true,
+    "execution_authorized": false,
+    "explicit_owner_approval_required": true,
+    "parent_closed_evidence_required": true,
+    "production_code_mutation": false
+  },
+  "promotions": []
+}
