@@ -154,6 +154,7 @@ def build_dashboard(
     human_checkpoint_history: dict[str, Any] | None = None,
     human_remediation_lifecycle: dict[str, Any] | None = None,
     human_remediation_action_queue: dict[str, Any] | None = None,
+    human_remediation_reopen_adjudication: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if human_checkpoint_history is None:
         accepted_history = load_human_checkpoint_history()
@@ -181,6 +182,16 @@ def build_dashboard(
             load_approval_registry(),
             load_promotion_ledger(),
             load_closure_ledger(),
+        )
+
+    if human_remediation_reopen_adjudication is None:
+        from .human_remediation_reopen import (
+            load_reopen_adjudication_ledger,
+            reopen_adjudication_summary,
+        )
+
+        human_remediation_reopen_adjudication = reopen_adjudication_summary(
+            load_reopen_adjudication_ledger()
         )
 
     verdicts = qualification["grading"]["verdict_counts"]
@@ -212,6 +223,7 @@ def build_dashboard(
         "human_v2": _human_section(human_trend_report, human_checkpoint_history),
         "human_remediation_lifecycle": human_remediation_lifecycle,
         "human_remediation_actions": human_remediation_action_queue,
+        "human_remediation_reopen_adjudication": human_remediation_reopen_adjudication,
         "defects": {
             "cluster_count": int((clusters or {}).get("cluster_count", 0)),
             "actionable_product_cluster_count": int(
@@ -245,6 +257,18 @@ def render_markdown(view: dict[str, Any]) -> str:
     human = view.get("human_v2", {"available": False})
     lifecycle = view.get("human_remediation_lifecycle", {"record_count": 0})
     actions = view.get("human_remediation_actions", {"record_count": 0, "items": []})
+    reopen = view.get(
+        "human_remediation_reopen_adjudication",
+        {
+            "adjudication_count": 0,
+            "pending_adjudication_count": 0,
+            "administrative_count": 0,
+            "confirmed_regression_count": 0,
+            "new_cycle_eligible_count": 0,
+            "pending": [],
+            "adjudications": [],
+        },
+    )
     defects = view["defects"]
     regressions = view["regressions"]
     trends = view["trends"]
@@ -441,6 +465,44 @@ def render_markdown(view: dict[str, Any]) -> str:
             ]
         )
 
+    if int(reopen.get("adjudication_count", 0)) > 0 or int(reopen.get("pending_adjudication_count", 0)) > 0:
+        lines.extend(
+            [
+                "",
+                "## Human remediation reopen adjudication",
+                "",
+                f"- Pending owner adjudication: {reopen.get('pending_adjudication_count', 0)}",
+                f"- Administrative / non-quality: {reopen.get('administrative_count', 0)}",
+                f"- Confirmed Human-quality regressions: {reopen.get('confirmed_regression_count', 0)}",
+                f"- New-cycle eligible: {reopen.get('new_cycle_eligible_count', 0)}",
+            ]
+        )
+        pending = reopen.get("pending", [])[:10]
+        if pending:
+            lines.extend(["", "### Pending reopen decisions", ""])
+            for item in pending:
+                service = f" / {item['service']}" if item.get("service") else ""
+                lines.append(
+                    f"- `{item['failure_code']}`{service}: issue #{item['issue_number']} requires explicit owner classification."
+                )
+        rows = reopen.get("adjudications", [])[:10]
+        if rows:
+            lines.extend(["", "### Reopen decisions", ""])
+            for item in rows:
+                checkpoint = ""
+                if item.get("fresh_regression_evidence"):
+                    checkpoint = f" / fresh checkpoint `{item['fresh_regression_evidence']['checkpoint_id']}`"
+                cycle = " / new-cycle eligible" if item.get("new_cycle_eligible") else " / terminal CLOSED preserved"
+                lines.append(
+                    f"- `{item['failure_code']}`: **{item['classification']}** / issue #{item['issue_number']}{checkpoint}{cycle}"
+                )
+        lines.extend(
+            [
+                "",
+                "A GitHub reopen is not proof of a Human-quality regression. Genuine regression classification requires a newer explicitly accepted checkpoint that shows the same targeted defect has returned; administrative reopens preserve the prior terminal CLOSED evidence and cannot start a new remediation cycle.",
+            ]
+        )
+
     lines.extend(
         [
             "",
@@ -459,7 +521,7 @@ def render_markdown(view: dict[str, Any]) -> str:
             "",
             str(q["boundary"]),
             "",
-            "The dashboard is presentation-only. It does not create evidence, override deterministic grading, convert fixture-pipeline results into live ROBERTA proof, promote Human defects automatically, mark a merged fix resolved without replay proof, close or reopen remediation issues automatically, rewrite terminal closure evidence, or authorize execution.",
+            "The dashboard is presentation-only. It does not create evidence, override deterministic grading, convert fixture-pipeline results into live ROBERTA proof, promote Human defects automatically, mark a merged fix resolved without replay proof, close or reopen remediation issues automatically, adjudicate a reopened issue automatically, create a new remediation cycle automatically, rewrite terminal closure evidence, or authorize execution.",
             "",
         ]
     )
