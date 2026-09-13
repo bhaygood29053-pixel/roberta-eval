@@ -1,0 +1,73 @@
+name: Human Root-Cause Candidate Patch Qualification Gate
+
+on:
+  pull_request:
+    paths:
+      - "src/roberta_eval/human_root_cause_patch_qualification.py"
+      - "tests/test_human_root_cause_patch_qualification.py"
+      - "config/human_root_cause_patch_qualification_ledger.json"
+      - "docs/HUMAN_ROOT_CAUSE_PATCH_QUALIFICATION.md"
+      - "pyproject.toml"
+      - ".github/workflows/human-root-cause-patch-qualification.yml"
+      - "src/roberta_eval/human_root_cause_artifact_sandbox.py"
+      - "src/roberta_eval/human_root_cause_experiment_execution.py"
+      - "src/roberta_eval/human_root_cause_direct_evidence.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-patch-qualification-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -e .[dev]
+
+      - name: Candidate patch qualification regressions
+        run: python -m pytest -q tests/test_human_root_cause_patch_qualification.py
+
+      - name: Validate tracked empty patch ledger
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_root_cause_patch_qualification import load_patch_ledger
+          ledger = load_patch_ledger()
+          assert ledger["qualifications"] == []
+          assert ledger["policy"]["support_required_for_pr_eligibility"] is True
+          assert ledger["policy"]["production_pr_created"] is False
+          assert ledger["policy"]["production_pr_merge_authorized"] is False
+          assert ledger["policy"]["execution_authorized"] is False
+          PY
+
+      - name: Installed patch CLI smoke
+        run: |
+          roberta-eval-human-root-cause-patch summary >/tmp/patch-summary.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('/tmp/patch-summary.json'))
+          assert payload["qualification_count"] == 0
+          assert payload["pr_eligible_count"] == 0
+          assert payload["production_pr_created"] is False
+          assert payload["production_pr_merge_authorized"] is False
+          PY
+
+      - name: Production PR and authority boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path("src/roberta_eval/human_root_cause_patch_qualification.py").read_text()
+          assert "production_pr_created" in text
+          assert "production_pr_creation_authorized" in text
+          assert "production_pr_merge_authorized" in text
+          assert "MaterializedHumanSandboxAdapter" in text
+          assert "execute_controlled_experiment" in text
+          assert "qualify_experiment_result" in text
+          assert "create_pull_request(" not in text
+          assert "merge_pull_request(" not in text
+          PY
