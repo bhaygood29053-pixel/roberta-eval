@@ -1,0 +1,36 @@
+{
+  "accepted": true,
+  "accepted_observed_at": "2026-09-13",
+  "commit_sha": "becb264b8026b5cbbf99f0d12dea62463510c6ee",
+  "empty_domains_allowed": [
+    "policy",
+    "prompt"
+  ],
+  "execution_authorized": false,
+  "files": [
+    {
+      "owner_domain": "shared_human_layer",
+      "path": "src/roberta/human_response_contract.py"
+    },
+    {
+      "owner_domain": "renderer",
+      "path": "src/roberta/human_response_renderer.py"
+    },
+    {
+      "owner_domain": "service_adapter",
+      "path": "src/roberta/bridge_http.py"
+    },
+    {
+      "owner_domain": "vocabulary_replacement",
+      "path": ".github/styles/RobertaHuman/TechnicalVocabulary.yml"
+    }
+  ],
+  "floating_ref": false,
+  "production_code_mutation": false,
+  "production_runtime_touched": false,
+  "read_only_source": true,
+  "repository": "bhaygood29053-pixel/roberta-langgraph",
+  "runtime_entrypoint": "roberta.human_response_renderer:render_human_response",
+  "source_pin_sha256": "5459b3541a4bea786ee829dc239e6354379c332886d41b76692c75dcbb8e2a3a",
+  "source_pin_version": "roberta_human_root_cause_source_pin/v1"
+}
