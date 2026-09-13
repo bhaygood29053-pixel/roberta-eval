@@ -1,0 +1,41 @@
+name: Human Remediation Lifecycle Gate
+
+on:
+  push:
+    branches: ["main", "lab-*"]
+  pull_request:
+
+jobs:
+  lifecycle-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+
+      - name: Lifecycle regressions
+        run: pytest tests/test_human_remediation_lifecycle.py tests/test_human_remediation_dashboard.py
+
+      - name: Validate tracked empty lifecycle
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_remediation_lifecycle import lifecycle_summary, load_lifecycle
+          summary = lifecycle_summary(load_lifecycle())
+          assert summary["record_count"] == 0
+          assert summary["active_count"] == 0
+          assert summary["resolved_count"] == 0
+          assert summary["judge_model_calls"] == 0
+          assert summary["external_calls"] == 0
+          assert summary["production_code_mutation"] is False
+          assert summary["execution_authorized"] is False
+          PY
+
+      - name: Installed lifecycle CLI smoke
+        run: roberta-eval-human-lifecycle --ledger config/human_remediation_lifecycle.json summary
