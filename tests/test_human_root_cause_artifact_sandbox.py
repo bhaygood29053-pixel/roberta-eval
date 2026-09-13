@@ -8,17 +8,19 @@ from pathlib import Path
 import pytest
 
 from roberta_eval.human_remediation_root_cause import DOMAINS
+from roberta_eval.human_root_cause_artifact_handoff import (
+    execute_materialized_handoff,
+    qualify_materialized_handoff_with_lab85,
+)
 from roberta_eval.human_root_cause_artifact_sandbox import (
     ARTIFACT_SANDBOX_LEDGER_VERSION,
     ROBERTA_RENDERER_ENTRYPOINT,
     ROBERTA_REPOSITORY,
     empty_artifact_sandbox_ledger,
-    execute_materialized_sandbox,
     lab87_corpus_cases,
     load_source_pin,
     materialize_candidate_artifact,
     materialize_control_artifact,
-    qualify_materialized_receipt_with_lab85,
     record_materialization,
     validate_artifact_sandbox_ledger,
     validate_source_pin,
@@ -222,7 +224,7 @@ def test_non_target_overlay_fails_closed(tmp_path: Path) -> None:
         )
 
 
-def test_materialized_offline_sandbox_produces_lab87_receipt_and_lab85_support(tmp_path: Path) -> None:
+def test_materialized_offline_sandbox_preserves_lab87_manifest_and_lab85_authority(tmp_path: Path) -> None:
     (
         pin,
         _,
@@ -234,7 +236,7 @@ def test_materialized_offline_sandbox_produces_lab87_receipt_and_lab85_support(t
         intervention,
         evidence,
     ) = _materialize(tmp_path)
-    receipt, handoff = execute_materialized_sandbox(
+    manifest, receipt, handoff = execute_materialized_handoff(
         plan,
         pin,
         control,
@@ -249,10 +251,13 @@ def test_materialized_offline_sandbox_produces_lab87_receipt_and_lab85_support(t
     assert receipt["intervention_failure_count"] == 0
     assert receipt["contains_causal_outcome"] is False
     assert "outcome" not in receipt
+    assert handoff["lab87_manifest_id"] == manifest["manifest_id"]
+    assert handoff["manifest_preserved_for_lab85"] is True
     assert handoff["runner_outcome_authority"] is False
     assert handoff["lab85_qualification_authority"] is True
-    result, qualification = qualify_materialized_receipt_with_lab85(
+    result, qualification = qualify_materialized_handoff_with_lab85(
         plan,
+        manifest,
         receipt,
         verified_by="Bryant",
     )
