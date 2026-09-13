@@ -1,0 +1,19 @@
+{
+  "ledger_version": "roberta_human_root_cause_patch_qualification_ledger/v1",
+  "policy": {
+    "accepted_control_source_required": true,
+    "target_domain_only": true,
+    "static_safety_required": true,
+    "lab89_runtime_isolation_authority": true,
+    "lab87_reproducibility_authority": true,
+    "lab85_direct_evidence_authority": true,
+    "support_required_for_pr_eligibility": true,
+    "one_pr_eligible_patch_per_plan": true,
+    "replacement_bodies_stored": false,
+    "production_pr_created": false,
+    "production_pr_merge_authorized": false,
+    "production_code_mutation": false,
+    "execution_authorized": false
+  },
+  "qualifications": []
+}
