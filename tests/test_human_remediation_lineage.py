@@ -284,7 +284,9 @@ def test_stored_generation_mismatch_fails_closed() -> None:
 
 def test_missing_parent_fails_closed() -> None:
     lifecycle, ledger = _chain(2)
-    ledger["promotions"][0]["parent_proposal_fingerprint"] = _fp("z")
+    # Keep the signed LAB #77 promotion intact, but replace the referenced parent
+    # lifecycle with an unrelated root. This isolates LAB #79's missing-parent gate.
+    lifecycle["records"][0] = _record(_fp("z"), sequence=1, issue_number=999)
     with pytest.raises(ValueError, match="missing parent"):
         build_generational_lineage_report(lifecycle, ledger)
 
