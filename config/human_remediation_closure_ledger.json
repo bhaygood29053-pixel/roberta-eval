@@ -1,0 +1,13 @@
+{
+  "ledger_version": "roberta_human_remediation_closure_ledger/v1",
+  "policy": {
+    "explicit_approval_required": true,
+    "close_issue_requires_explicit_flag": true,
+    "closure_requires_resolved": true,
+    "duplicate_close_prevention": true,
+    "target_repository": "bhaygood29053-pixel/roberta-langgraph",
+    "production_code_mutation": false,
+    "execution_authorized": false
+  },
+  "closures": []
+}

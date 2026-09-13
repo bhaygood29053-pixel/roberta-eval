@@ -20,6 +20,7 @@ roberta-eval-human-checkpoint = "roberta_eval.human_checkpoint_history:main"
 roberta-eval-human-promote = "roberta_eval.human_remediation_promotion:main"
 roberta-eval-human-lifecycle = "roberta_eval.human_remediation_lifecycle:main"
 roberta-eval-human-actions = "roberta_eval.human_remediation_actions:main"
+roberta-eval-human-close = "roberta_eval.human_remediation_closure:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
