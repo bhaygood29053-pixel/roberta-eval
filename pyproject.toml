@@ -30,6 +30,7 @@ roberta-eval-human-root-cause-acquire = "roberta_eval.human_root_cause_evidence_
 roberta-eval-human-root-cause-direct = "roberta_eval.human_root_cause_direct_evidence:main"
 roberta-eval-human-root-cause-execute = "roberta_eval.human_root_cause_experiment_execution:main"
 roberta-eval-human-root-cause-sandbox = "roberta_eval.human_root_cause_artifact_sandbox:main"
+roberta-eval-human-root-cause-patch = "roberta_eval.human_root_cause_patch_qualification:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
