@@ -1,0 +1,13 @@
+{
+  "registry_version": "roberta_human_remediation_approval_registry/v1",
+  "policy": {
+    "source_result": "roberta_human_remediation_promotion_result/v1",
+    "accepted_status": "APPROVED_DRY_RUN",
+    "issue_created": false,
+    "raw_responses_stored": false,
+    "proposal_bodies_stored": false,
+    "production_code_mutation": false,
+    "execution_authorized": false
+  },
+  "approvals": []
+}

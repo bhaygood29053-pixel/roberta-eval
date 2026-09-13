@@ -153,6 +153,7 @@ def build_dashboard(
     human_trend_report: dict[str, Any] | None = None,
     human_checkpoint_history: dict[str, Any] | None = None,
     human_remediation_lifecycle: dict[str, Any] | None = None,
+    human_remediation_action_queue: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if human_checkpoint_history is None:
         accepted_history = load_human_checkpoint_history()
@@ -168,6 +169,20 @@ def build_dashboard(
         from .human_remediation_lifecycle import lifecycle_summary, load_lifecycle
 
         human_remediation_lifecycle = lifecycle_summary(load_lifecycle())
+
+    if human_remediation_action_queue is None:
+        # Action intelligence is also loaded lazily so the dashboard remains a
+        # presentation surface rather than an authority source.
+        from .human_remediation_actions import build_action_queue, load_approval_registry
+        from .human_remediation_lifecycle import load_lifecycle
+        from .human_remediation_promotion import load_promotion_ledger
+
+        human_remediation_action_queue = build_action_queue(
+            load_lifecycle(),
+            load_human_checkpoint_history(),
+            load_approval_registry(),
+            load_promotion_ledger(),
+        )
 
     verdicts = qualification["grading"]["verdict_counts"]
     coverage = qualification["coverage"]
@@ -197,6 +212,7 @@ def build_dashboard(
         },
         "human_v2": _human_section(human_trend_report, human_checkpoint_history),
         "human_remediation_lifecycle": human_remediation_lifecycle,
+        "human_remediation_actions": human_remediation_action_queue,
         "defects": {
             "cluster_count": int((clusters or {}).get("cluster_count", 0)),
             "actionable_product_cluster_count": int(
@@ -229,6 +245,7 @@ def render_markdown(view: dict[str, Any]) -> str:
     a = view["advisory"]
     human = view.get("human_v2", {"available": False})
     lifecycle = view.get("human_remediation_lifecycle", {"record_count": 0})
+    actions = view.get("human_remediation_actions", {"record_count": 0, "items": []})
     defects = view["defects"]
     regressions = view["regressions"]
     trends = view["trends"]
@@ -365,6 +382,40 @@ def render_markdown(view: dict[str, Any]) -> str:
             ]
         )
 
+    if int(actions.get("record_count", 0)) > 0:
+        lines.extend(
+            [
+                "",
+                "## Human remediation action queue",
+                "",
+                f"- Tracked actions: {actions['record_count']}",
+                f"- Active remediations: {actions['active_count']}",
+                f"- Closure-ready issues: {actions['closure_ready_count']}",
+                "- Action counts: " + ", ".join(
+                    f"{name}={count}"
+                    for name, count in actions.get("action_counts", {}).items()
+                    if count
+                ),
+                "",
+                "### Exact next actions",
+                "",
+            ]
+        )
+        for item in actions.get("items", [])[:10]:
+            service = f" / {item['service']}" if item.get("service") else ""
+            issue = f" / issue #{item['issue_number']}" if item.get("issue_number") else ""
+            ready = " / closure-ready" if item.get("closure_ready") else ""
+            lines.append(
+                f"- `{item['failure_code']}`{service}: **{item['next_action_label']}** "
+                f"({item['effective_stage']}){issue}{ready}"
+            )
+        lines.extend(
+            [
+                "",
+                "The closure gate is fail-closed: only lifecycle status RESOLVED with a promoted issue identity is closure-ready. IMPROVED, REPLAY_VERIFIED, and FIX_MERGED are never sufficient for closure.",
+            ]
+        )
+
     lines.extend(
         [
             "",
@@ -383,7 +434,7 @@ def render_markdown(view: dict[str, Any]) -> str:
             "",
             str(q["boundary"]),
             "",
-            "The dashboard is presentation-only. It does not create evidence, override deterministic grading, convert fixture-pipeline results into live ROBERTA proof, promote Human defects automatically, mark a merged fix resolved without replay proof, or authorize execution.",
+            "The dashboard is presentation-only. It does not create evidence, override deterministic grading, convert fixture-pipeline results into live ROBERTA proof, promote Human defects automatically, mark a merged fix resolved without replay proof, close remediation issues automatically, or authorize execution.",
             "",
         ]
     )
