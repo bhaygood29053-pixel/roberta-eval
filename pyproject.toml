@@ -28,6 +28,7 @@ roberta-eval-human-lineage = "roberta_eval.human_remediation_lineage:main"
 roberta-eval-human-root-cause = "roberta_eval.human_remediation_root_cause:main"
 roberta-eval-human-root-cause-acquire = "roberta_eval.human_root_cause_evidence_acquisition:main"
 roberta-eval-human-root-cause-direct = "roberta_eval.human_root_cause_direct_evidence:main"
+roberta-eval-human-root-cause-execute = "roberta_eval.human_root_cause_experiment_execution:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
