@@ -18,6 +18,7 @@ roberta-eval = "roberta_eval.cli:main"
 roberta-eval-human-trends = "roberta_eval.human_trends:main"
 roberta-eval-human-checkpoint = "roberta_eval.human_checkpoint_history:main"
 roberta-eval-human-promote = "roberta_eval.human_remediation_promotion:main"
+roberta-eval-human-lifecycle = "roberta_eval.human_remediation_lifecycle:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
