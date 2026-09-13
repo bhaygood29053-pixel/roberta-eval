@@ -1,0 +1,22 @@
+{
+  "ledger_version": "roberta_human_root_cause_direct_evidence_ledger/v1",
+  "plans": [],
+  "policy": {
+    "automatic_issue_creation": false,
+    "cross_generation_confirmation_required": true,
+    "direct_evidence_requires_qualified_experiment": true,
+    "execution_authorized": false,
+    "falsification_required": true,
+    "lab81_confirmation_authority": true,
+    "matched_corpus_required": true,
+    "minimum_matched_case_count": 20,
+    "minimum_replicate_count": 2,
+    "non_target_domains_held_constant_required": true,
+    "one_final_result_per_plan": true,
+    "pre_registration_required": true,
+    "production_code_mutation": false,
+    "single_generation_confirmation": false,
+    "single_target_domain_required": true
+  },
+  "results": []
+}
