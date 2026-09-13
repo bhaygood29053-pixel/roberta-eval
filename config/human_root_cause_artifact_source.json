@@ -10,10 +10,6 @@
   "files": [
     {
       "owner_domain": "shared_human_layer",
-      "path": "src/roberta/__init__.py"
-    },
-    {
-      "owner_domain": "shared_human_layer",
       "path": "src/roberta/human_response_contract.py"
     },
     {
@@ -35,6 +31,6 @@
   "read_only_source": true,
   "repository": "bhaygood29053-pixel/roberta-langgraph",
   "runtime_entrypoint": "roberta.human_response_renderer:render_human_response",
-  "source_pin_sha256": "2f1215bc5f7b3acde012d495154c367cff7dcba73f27dddaa1b737a928019960",
+  "source_pin_sha256": "5459b3541a4bea786ee829dc239e6354379c332886d41b76692c75dcbb8e2a3a",
   "source_pin_version": "roberta_human_root_cause_source_pin/v1"
 }
