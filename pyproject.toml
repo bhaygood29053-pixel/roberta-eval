@@ -24,6 +24,7 @@ roberta-eval-human-close = "roberta_eval.human_remediation_closure:main"
 roberta-eval-human-terminal = "roberta_eval.human_remediation_terminal:main"
 roberta-eval-human-reopen = "roberta_eval.human_remediation_reopen:main"
 roberta-eval-human-reopen-cycle = "roberta_eval.human_remediation_reopen_cycle:main"
+roberta-eval-human-lineage = "roberta_eval.human_remediation_lineage:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
