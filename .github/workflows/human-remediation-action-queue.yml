@@ -1,0 +1,90 @@
+name: Human Remediation Action Queue Gate
+
+on:
+  push:
+    branches: ["main", "lab-*"]
+  pull_request:
+
+jobs:
+  action-queue-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+
+      - name: Action queue regressions
+        run: pytest tests/test_human_remediation_actions.py tests/test_human_remediation_action_dashboard.py
+
+      - name: Validate tracked approval registry
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_remediation_actions import load_approval_registry
+          registry = load_approval_registry()
+          assert registry["approvals"] == []
+          assert registry["policy"]["issue_created"] is False
+          assert registry["policy"]["production_code_mutation"] is False
+          PY
+
+      - name: Installed action queue CLI smoke
+        run: |
+          roberta-eval-human-actions queue > /tmp/human-action-queue.json
+          python - <<'PY'
+          import json
+          payload = json.load(open("/tmp/human-action-queue.json", encoding="utf-8"))
+          assert payload["record_count"] == 0
+          assert payload["closure_ready_count"] == 0
+          assert payload["external_calls"] == 0
+          assert payload["auto_close_issue"] is False
+          PY
+
+      - name: Approval receipt persistence smoke
+        run: |
+          cp config/human_remediation_approval_registry.json /tmp/human-approval-registry.json
+          python - <<'PY'
+          import json
+          payload = {
+              "promotion_result_version": "roberta_human_remediation_promotion_result/v1",
+              "status": "APPROVED_DRY_RUN",
+              "issue_created": False,
+              "target_repository": "bhaygood29053-pixel/roberta-langgraph",
+              "approval": {
+                  "approval_version": "roberta_human_remediation_approval/v1",
+                  "approved": True,
+                  "approved_by": "ci-reviewer",
+                  "proposal_fingerprint": "a" * 64,
+                  "proposal_sha256": "b" * 64,
+                  "evidence_key": "c" * 64,
+                  "target_repository": "bhaygood29053-pixel/roberta-langgraph",
+                  "previous_snapshot_id": "before",
+                  "current_snapshot_id": "after",
+                  "failure_code": "technical_language_leak",
+                  "recurrence": "RECURRENT",
+                  "service": "pre_trade",
+                  "production_code_mutation": False,
+                  "execution_authorized": False,
+              },
+              "production_code_mutation": False,
+              "execution_authorized": False,
+          }
+          with open("/tmp/human-approval-result.json", "w", encoding="utf-8") as handle:
+              json.dump(payload, handle)
+          PY
+          roberta-eval-human-actions \
+            --approval-registry /tmp/human-approval-registry.json \
+            record-approval \
+            --result /tmp/human-approval-result.json
+          python - <<'PY'
+          import json
+          registry = json.load(open("/tmp/human-approval-registry.json", encoding="utf-8"))
+          assert len(registry["approvals"]) == 1
+          assert registry["approvals"][0]["approved_by"] == "ci-reviewer"
+          assert "body" not in registry["approvals"][0]
+          PY
