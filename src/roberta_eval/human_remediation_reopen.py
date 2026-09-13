@@ -269,7 +269,11 @@ def validate_reopen_adjudication(adjudication: dict[str, Any]) -> None:
         if not isinstance(cycle_id, str) or not cycle_id.startswith("human-remediation-reopen::"):
             raise ValueError("confirmed genuine regression requires deterministic new-cycle identity")
 
-    expected = {key: value for key, value in adjudication.items() if key != "decision_sha256"}
+    expected = {
+        key: value
+        for key, value in adjudication.items()
+        if key not in {"decision_sha256", "sequence"}
+    }
     if adjudication["decision_sha256"] != _stable_sha256(expected):
         raise ValueError("reopen adjudication decision digest mismatch")
 
