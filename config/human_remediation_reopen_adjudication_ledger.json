@@ -1,0 +1,12 @@
+{
+  "ledger_version": "roberta_human_remediation_reopen_adjudication_ledger/v1",
+  "policy": {
+    "explicit_owner_adjudication_required": true,
+    "fresh_checkpoint_required_for_regression": true,
+    "administrative_reopen_preserves_terminal_closed": true,
+    "automatic_new_cycle_creation": false,
+    "production_code_mutation": false,
+    "execution_authorized": false
+  },
+  "adjudications": []
+}
