@@ -1,0 +1,78 @@
+name: Human Root-Cause Direct Evidence Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  direct-evidence-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install -e .[dev]
+
+      - name: Direct evidence qualification regressions
+        run: python -m pytest tests/test_human_root_cause_direct_evidence.py -q
+
+      - name: Validate tracked empty direct evidence ledger
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from roberta_eval.human_root_cause_direct_evidence import load_direct_evidence_ledger
+
+          ledger = load_direct_evidence_ledger(Path("config/human_root_cause_direct_evidence_ledger.json"))
+          assert ledger["plans"] == []
+          assert ledger["results"] == []
+          assert ledger["policy"]["pre_registration_required"] is True
+          assert ledger["policy"]["one_final_result_per_plan"] is True
+          assert ledger["policy"]["falsification_required"] is True
+          assert ledger["policy"]["single_generation_confirmation"] is False
+          assert ledger["policy"]["cross_generation_confirmation_required"] is True
+          assert ledger["policy"]["production_code_mutation"] is False
+          assert ledger["policy"]["execution_authorized"] is False
+          print("tracked direct-evidence ledger: PASS")
+          PY
+
+      - name: Installed CLI smoke
+        run: |
+          roberta-eval-human-root-cause-direct summary > /tmp/direct-summary.json
+          python - <<'PY'
+          import json
+          payload = json.load(open("/tmp/direct-summary.json"))
+          assert payload["plan_count"] == 0
+          assert payload["result_count"] == 0
+          assert payload["pre_registration_required"] is True
+          assert payload["one_final_result_per_plan"] is True
+          assert payload["single_generation_confirmation"] is False
+          assert payload["production_code_mutation"] is False
+          assert payload["execution_authorized"] is False
+          print("installed direct-evidence CLI: PASS")
+          PY
+
+      - name: Falsification and authority boundary
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_root_cause_direct_evidence import empty_direct_evidence_ledger
+
+          ledger = empty_direct_evidence_ledger()
+          assert ledger["policy"]["direct_evidence_requires_qualified_experiment"] is True
+          assert ledger["policy"]["falsification_required"] is True
+          assert ledger["policy"]["lab81_confirmation_authority"] is True
+          assert ledger["policy"]["single_generation_confirmation"] is False
+          assert ledger["policy"]["automatic_issue_creation"] is False
+          assert ledger["policy"]["production_code_mutation"] is False
+          assert ledger["policy"]["execution_authorized"] is False
+          print("direct-evidence authority boundary: PASS")
+          PY
