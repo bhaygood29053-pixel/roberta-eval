@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .dashboard import _human_priority
+
 PROMOTION_VERSION = "roberta_github_defect_proposal/v1"
 
 ROUTES = {
@@ -17,6 +19,8 @@ ROUTES = {
     "unknown": None,
 }
 
+HUMAN_REMEDIATION_REPOSITORY = "bhaygood29053-pixel/roberta-langgraph"
+
 
 def _fingerprint(cluster: dict[str, Any]) -> str:
     payload = {
@@ -25,6 +29,22 @@ def _fingerprint(cluster: dict[str, Any]) -> str:
         "service": cluster["service"],
         "likely_layer": cluster["likely_layer"],
         "reason": cluster["reason"],
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _human_fingerprint(report: dict[str, Any], priority: dict[str, Any]) -> str:
+    comparison = report["comparison"]
+    payload = {
+        "kind": "human_language",
+        "previous_snapshot_id": comparison["previous_snapshot_id"],
+        "current_snapshot_id": comparison["current_snapshot_id"],
+        "failure_code": priority["failure_code"],
+        "recurrence": priority["recurrence"],
+        "service": priority.get("service"),
+        "current_rate": priority["current_rate"],
+        "current_count": priority["current_count"],
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
@@ -82,6 +102,7 @@ def build_issue_proposal(
     )
     return {
         "proposal_version": PROMOTION_VERSION,
+        "proposal_kind": "deterministic_defect_cluster",
         "proposal_fingerprint": _fingerprint(cluster),
         "cluster_id": cluster["cluster_id"],
         "target_repository": target_repo,
@@ -90,8 +111,106 @@ def build_issue_proposal(
         "body": "\n".join(body_lines),
         "labels": ["roberta-lab", "defect", cluster["severity"].lower()],
         "confirmed": True,
+        "reviewable_proposal_only": True,
         "issue_created": False,
     }
+
+
+def build_human_language_issue_proposal(
+    report: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not isinstance(report, dict):
+        raise ValueError("Human trend report is required")
+    comparison = report.get("comparison")
+    if not isinstance(comparison, dict):
+        raise ValueError("Human trend comparison is required")
+    if comparison.get("ai_judge_used") is not False:
+        raise ValueError("Human remediation proposal requires deterministic comparison")
+    if comparison.get("judge_model_calls") != 0 or comparison.get("external_calls") != 0:
+        raise ValueError("Human remediation proposal requires zero-call comparison")
+    if comparison.get("execution_authorized") is not False:
+        raise ValueError("Human remediation proposal cannot carry execution authority")
+
+    priority = _human_priority(report)
+    if priority is None:
+        return None
+
+    failure_code = str(priority["failure_code"])
+    recurrence = str(priority["recurrence"])
+    service = priority.get("service") or "human_response"
+    current_rate = float(priority["current_rate"])
+    current_count = int(priority["current_count"])
+    previous_id = str(comparison["previous_snapshot_id"])
+    current_id = str(comparison["current_snapshot_id"])
+    source_mode = str(report.get("source_mode") or "explicit_human_trend_report")
+
+    title = f"[ROBERTA Lab][Human v2] {service}: {failure_code} ({recurrence})"
+    body_lines = [
+        "## Human ROBERTA v2 remediation proposal",
+        "",
+        f"- Previous accepted checkpoint/snapshot: {previous_id}",
+        f"- Current accepted checkpoint/snapshot: {current_id}",
+        f"- Comparison source: {source_mode}",
+        f"- Failure code: {failure_code}",
+        f"- Recurrence: {recurrence}",
+        f"- Highest-priority affected service: {service}",
+        f"- Current defect rate: {current_rate * 100.0:.2f}%",
+        f"- Current occurrences: {current_count}",
+        "",
+        "## Why this is proposed",
+        "",
+        "The Evaluation Dashboard selected this as the next Human-language defect to fix "
+        "using its deterministic priority rule: highest-rate recurring defect first, "
+        "otherwise highest-rate new defect. This is language-quality evidence only; it "
+        "does not change factual authority or prove an upstream data defect.",
+        "",
+        "## Required engineering proof",
+        "",
+        "1. Reproduce the Human-language defect from a saved replay or permanent fixture.",
+        "2. Identify the Human renderer/template/service path that emits the wording.",
+        "3. Fix the wording without changing structured facts, evidence, recommendation meaning, authority, or execution state.",
+        "4. Add a permanent regression for the confirmed language defect.",
+        "5. Rerun the zero-token Human v2 grader and trend comparison and show the defect rate improves without introducing a new Human-language regression.",
+        "",
+        "## Safety boundary",
+        "",
+        "This is a reviewable proposal only. The Laboratory did not create a GitHub issue, "
+        "did not modify ROBERTA production code, did not call a model/provider/RPC, and "
+        "did not authorize execution.",
+    ]
+    return {
+        "proposal_version": PROMOTION_VERSION,
+        "proposal_kind": "human_language_remediation",
+        "proposal_fingerprint": _human_fingerprint(report, priority),
+        "target_repository": HUMAN_REMEDIATION_REPOSITORY,
+        "routing_status": "routed",
+        "title": title,
+        "body": "\n".join(body_lines),
+        "labels": ["roberta-lab", "defect", "human-v2", "language-quality"],
+        "confirmed": True,
+        "confirmation_basis": "accepted_human_checkpoint_or_explicit_trend",
+        "human_priority": dict(priority),
+        "previous_snapshot_id": previous_id,
+        "current_snapshot_id": current_id,
+        "source_mode": source_mode,
+        "reviewable_proposal_only": True,
+        "issue_created": False,
+        "production_mutation": False,
+        "ai_judge_used": False,
+        "judge_model_calls": 0,
+        "external_calls": 0,
+        "zero_judge_tokens": True,
+        "execution_authorized": False,
+    }
+
+
+def build_human_language_issue_proposals(
+    report: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if report is None:
+        return []
+    proposal = build_human_language_issue_proposal(report)
+    return [proposal] if proposal is not None else []
 
 
 def build_issue_proposals(
@@ -124,7 +243,15 @@ def proposal_summary(proposals: list[dict[str, Any]]) -> dict[str, Any]:
         "needs_localization_count": sum(
             1 for item in proposals if item["routing_status"] == "needs_localization"
         ),
+        "human_language_count": sum(
+            1 for item in proposals if item.get("proposal_kind") == "human_language_remediation"
+        ),
         "issue_created_count": sum(1 for item in proposals if item["issue_created"]),
+        "reviewable_proposal_only": True,
+        "ai_judge_used": False,
+        "judge_model_calls": 0,
+        "external_calls": 0,
+        "zero_judge_tokens": True,
     }
 
 
@@ -134,6 +261,13 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("expected JSON object")
+    return payload
 
 
 def write_proposals(path: Path, proposals: list[dict[str, Any]]) -> None:
