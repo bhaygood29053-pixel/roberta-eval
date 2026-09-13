@@ -1,0 +1,55 @@
+name: Human Remediation Closure Promotion Gate
+
+on:
+  push:
+    branches: ["main", "lab-*"]
+  pull_request:
+
+jobs:
+  closure-promotion-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+
+      - name: Closure promotion regressions
+        run: pytest tests/test_human_remediation_closure.py
+
+      - name: Validate tracked empty closure ledger
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_remediation_closure import (
+              closure_ledger_summary,
+              load_closure_ledger,
+          )
+          summary = closure_ledger_summary(load_closure_ledger())
+          assert summary["closure_count"] == 0
+          assert summary["explicit_approval_required"] is True
+          assert summary["duplicate_close_prevention"] is True
+          assert summary["production_code_mutation"] is False
+          assert summary["execution_authorized"] is False
+          PY
+
+      - name: Installed closure CLI smoke
+        run: roberta-eval-human-close --help
+
+      - name: Safety boundary
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_remediation_closure import empty_closure_ledger
+          ledger = empty_closure_ledger()
+          assert ledger["policy"]["explicit_approval_required"] is True
+          assert ledger["policy"]["close_issue_requires_explicit_flag"] is True
+          assert ledger["policy"]["closure_requires_resolved"] is True
+          assert ledger["policy"]["duplicate_close_prevention"] is True
+          assert ledger["policy"]["production_code_mutation"] is False
+          assert ledger["policy"]["execution_authorized"] is False
+          PY
