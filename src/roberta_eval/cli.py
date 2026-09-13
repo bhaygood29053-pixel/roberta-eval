@@ -14,7 +14,15 @@ from .clustering import cluster_findings, cluster_summary, load_jsonl as load_cl
 from .grader import grade_records, grader_summary, load_run_jsonl, write_grades
 from .dashboard import build_dashboard, write_dashboard_json, write_dashboard_markdown
 from .generator import generate_cases, generated_summary, write_generated
-from .github_promotion import build_issue_proposals, load_jsonl as load_proposal_jsonl, proposal_summary, write_proposals
+from .github_promotion import (
+    build_human_language_issue_proposals,
+    build_issue_proposals,
+    load_json as load_proposal_json,
+    load_jsonl as load_proposal_jsonl,
+    proposal_summary,
+    write_proposals,
+)
+from .human_checkpoint_history import latest_human_checkpoint_report, load_human_checkpoint_history
 from .human_trends import build_human_trend_report
 from .live import LIVE_TELEMETRY_VERSION, grade_live_records, live_case_summary, live_grader_summary, materialize_live_cases, write_live_cases, write_live_grades
 from .live_diagnostics import diagnose_live_grades, load_live_grades, write_diagnostics_json, write_diagnostics_markdown
@@ -299,9 +307,30 @@ def dashboard_suite(
     return 0
 
 
-def proposal_suite(clusters_path: str, confirmed: list[str], output: str | None) -> int:
-    clusters = load_proposal_jsonl(Path(clusters_path))
-    proposals = build_issue_proposals(clusters, confirmed_cluster_ids=set(confirmed))
+def proposal_suite(
+    clusters_path: str | None,
+    confirmed: list[str],
+    output: str | None,
+    *,
+    human_checkpoints: bool = False,
+    human_report_path: str | None = None,
+    human_history_path: str | None = None,
+) -> int:
+    if clusters_path:
+        clusters = load_proposal_jsonl(Path(clusters_path))
+        proposals = build_issue_proposals(clusters, confirmed_cluster_ids=set(confirmed))
+    elif human_report_path:
+        report = load_proposal_json(Path(human_report_path))
+        proposals = build_human_language_issue_proposals(report)
+    elif human_checkpoints:
+        history = load_human_checkpoint_history(
+            Path(human_history_path) if human_history_path else None
+        )
+        report = latest_human_checkpoint_report(history)
+        proposals = build_human_language_issue_proposals(report)
+    else:
+        raise ValueError("defect proposal source is required")
+
     if output:
         write_proposals(Path(output), proposals)
     print(json.dumps(proposal_summary(proposals), indent=2, sort_keys=True))
@@ -392,7 +421,11 @@ def main() -> int:
     dashboard_parser.add_argument("--human-previous", default=None, help="previous saved ROBERTA run file/directory")
     dashboard_parser.add_argument("--human-current", default=None, help="current saved ROBERTA run file/directory")
     proposal_parser = subparsers.add_parser("defect-proposals", help="build reviewable GitHub issue proposals")
-    proposal_parser.add_argument("--clusters", required=True)
+    proposal_source = proposal_parser.add_mutually_exclusive_group(required=True)
+    proposal_source.add_argument("--clusters", default=None, help="classified defect clusters JSONL")
+    proposal_source.add_argument("--human-checkpoints", action="store_true", help="use latest two accepted Human v2 checkpoints")
+    proposal_source.add_argument("--human-report", default=None, help="explicit Human v2 trend report JSON")
+    proposal_parser.add_argument("--human-history", default=None, help="optional Human checkpoint history JSON path")
     proposal_parser.add_argument("--confirm", action="append", default=[])
     proposal_parser.add_argument("--output", default=None)
     release_parser = subparsers.add_parser("release-qualify", help="evaluate release qualification gates")
@@ -424,7 +457,15 @@ def main() -> int:
     if args.command == "regressions": return regression_memory_suite()
     if args.command == "trends": return trend_suite()
     if args.command == "dashboard": return dashboard_suite(args.json_output, args.markdown_output, args.human_previous, args.human_current)
-    if args.command == "defect-proposals": return proposal_suite(args.clusters, args.confirm, args.output)
+    if args.command == "defect-proposals":
+        return proposal_suite(
+            args.clusters,
+            args.confirm,
+            args.output,
+            human_checkpoints=args.human_checkpoints,
+            human_report_path=args.human_report,
+            human_history_path=args.human_history,
+        )
     if args.command == "release-qualify": return release_qualification_suite(args.scope, args.output)
     if args.command == "scale": return scale_suite(args.limit, args.output)
     return 2
