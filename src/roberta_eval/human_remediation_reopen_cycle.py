@@ -495,7 +495,10 @@ def instantiate_reopen_cycle(
         raise ValueError("reopen cycle promoter identity is required")
 
     adjudication = _find_adjudication(adjudication_ledger, parent_fingerprint)
-    seed = build_new_cycle_seed(adjudication_ledger, fingerprint=parent_fingerprint)
+    seed = {
+        **build_new_cycle_seed(adjudication_ledger, fingerprint=parent_fingerprint),
+        "prior_resolved_checkpoint_id": adjudication["prior_resolved_checkpoint_id"],
+    }
     if seed.get("seed_version") != REOPEN_CYCLE_SEED_VERSION or seed.get("new_cycle_eligible") is not True:
         raise ValueError("LAB #75 reopen cycle seed is not eligible")
     parent = _find_parent(lifecycle, parent_fingerprint)
