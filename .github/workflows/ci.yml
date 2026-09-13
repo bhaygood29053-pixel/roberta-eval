@@ -91,6 +91,59 @@ jobs:
           assert summary["local_paths_stored"] is False
           PY
 
+      - name: Human remediation proposal smoke
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          source = Path("/tmp/roberta-run.jsonl")
+          target = Path("/tmp/roberta-run-human-defect.jsonl")
+          rows = []
+          for line in source.read_text(encoding="utf-8").splitlines():
+              if not line.strip():
+                  continue
+              row = json.loads(line)
+              row["record_id"] = f"human-defect::{row['record_id']}"
+              row["case_id"] = f"human-defect::{row['case_id']}"
+              row["response"]["reply"] = "CMIS deterministic risk engine says the freshness state is unverified."
+              row["response"]["response_depth"] = "normal"
+              row["response"]["execution_authorized"] = False
+              rows.append(row)
+          target.write_text(
+              "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
+              encoding="utf-8",
+          )
+          PY
+          roberta-eval-human-checkpoint \
+            --input /tmp/roberta-run-human-defect.jsonl \
+            --checkpoint-id ci-human-002 \
+            --history /tmp/human-checkpoint-history.json \
+            --accept
+          roberta-eval defect-proposals \
+            --human-checkpoints \
+            --human-history /tmp/human-checkpoint-history.json \
+            --output /tmp/roberta-human-remediation-proposals.jsonl
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line)
+              for line in Path("/tmp/roberta-human-remediation-proposals.jsonl").read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
+          assert len(rows) == 1
+          proposal = rows[0]
+          assert proposal["proposal_kind"] == "human_language_remediation"
+          assert proposal["target_repository"] == "bhaygood29053-pixel/roberta-langgraph"
+          assert proposal["issue_created"] is False
+          assert proposal["production_mutation"] is False
+          assert proposal["judge_model_calls"] == 0
+          assert proposal["external_calls"] == 0
+          assert proposal["execution_authorized"] is False
+          PY
+
       - name: Adversarial suite
         run: roberta-eval adversarial --write /tmp/roberta-adversarial-suite.jsonl
 

@@ -162,6 +162,30 @@ Checkpoint IDs are immutable. Repeating the same checkpoint ID with the same cor
 
 This checkpoint path remains zero-token: no DeepSeek/LLM judge, provider, RPC, or HTTP call is introduced by checkpoint creation or dashboard comparison.
 
+## Human v2 remediation proposals
+
+The existing LAB defect-proposal system can turn the dashboard's next Human-language priority into a reviewable remediation proposal from the latest two accepted checkpoints:
+
+```bash
+roberta-eval defect-proposals \
+  --human-checkpoints \
+  --output /tmp/roberta-human-remediation-proposals.jsonl
+```
+
+A custom accepted checkpoint history can be supplied with `--human-history`. An explicit Human trend report can be proposed instead with `--human-report`:
+
+```bash
+roberta-eval defect-proposals \
+  --human-report /tmp/roberta-human-trend.json \
+  --output /tmp/roberta-human-remediation-proposals.jsonl
+```
+
+Human remediation proposals use the exact same deterministic priority selection as the dashboard: highest-rate recurring current defect first, otherwise highest-rate NEW current defect. If fewer than two accepted checkpoints exist, or the current comparison has no Human-language defect, the command writes zero proposals rather than inventing work.
+
+A generated Human proposal is routed to `bhaygood29053-pixel/roberta-langgraph` and records the previous/current checkpoint IDs, failure code, recurrence, current rate/count, highest-priority affected service, and required replay/regression proof. It remains a **reviewable proposal only**: `issue_created=false`, `production_mutation=false`, `judge_model_calls=0`, `external_calls=0`, and `execution_authorized=false`.
+
+The Laboratory never opens the proposed GitHub issue automatically and never changes ROBERTA production code from this path. A human/project-owner review is required before any remediation work is promoted.
+
 ## Live evidence-backed evaluation
 
 Synthetic fixture cases and live ROBERTA cases are intentionally separate.
@@ -209,7 +233,7 @@ LAB #22 keeps `EVIDENCE_REQUIRED` separate from a factual ROBERTA failure and
 prioritizes runtime, telemetry, canonical-claim, evidence-metadata, Claim
 Integrity, claim/evidence, and execution-boundary remediation deterministically.
 
-Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new live evaluation campaigns, live grading/diagnostics, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53, LAB #55, LAB #57, LAB #59, and LAB #61 are bounded offline tooling changes and do not by themselves resume those paused live campaigns.
+Current checkpoint: `live-smoke-004` completed with 20/20 runtime OK, 8 PASS, 12 EVIDENCE_REQUIRED, and 0 FAIL. The owner has paused all active Evaluation Laboratory work. No LAB #21/#22 runs, `live-smoke-005`, new live evaluation campaigns, live grading/diagnostics, or eval-driven regression promotion should run until explicitly resumed. Protected `roberta-core` #89 / PR #90 is not an active eval gate while this pause is in effect. LAB #53, LAB #55, LAB #57, LAB #59, LAB #61, and LAB #63 are bounded offline tooling changes and do not by themselves resume those paused live campaigns.
 
 A human-only ROBERTA response without the LAB #21 telemetry contract is `EVIDENCE_REQUIRED`, not a fabricated PASS or FAIL. Live mode never uses the synthetic fixture answer key.
 
