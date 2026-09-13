@@ -1,0 +1,16 @@
+{
+  "lifecycle_version": "roberta_human_remediation_lifecycle/v1",
+  "policy": {
+    "proposal_registration_required": true,
+    "promotion_evidence_source": "roberta_human_remediation_promotion_ledger/v1",
+    "fix_merge_requires_explicit_evidence": true,
+    "replay_verification_requires_later_accepted_checkpoint": true,
+    "resolution_requires_zero_targeted_failure_count": true,
+    "improvement_requires_lower_targeted_failure_rate": true,
+    "raw_responses_stored": false,
+    "proposal_bodies_stored": false,
+    "production_code_mutation": false,
+    "execution_authorized": false
+  },
+  "records": []
+}
