@@ -152,6 +152,7 @@ def build_dashboard(
     trend_comparison: dict[str, Any] | None = None,
     human_trend_report: dict[str, Any] | None = None,
     human_checkpoint_history: dict[str, Any] | None = None,
+    human_remediation_lifecycle: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if human_checkpoint_history is None:
         accepted_history = load_human_checkpoint_history()
@@ -160,6 +161,13 @@ def build_dashboard(
             human_trend_report = latest_human_checkpoint_report(accepted_history)
         if quality is None and accepted_history["checkpoints"]:
             quality = accepted_history["checkpoints"][-1]["quality"]
+
+    if human_remediation_lifecycle is None:
+        # Lazy import avoids a module cycle: Human proposal generation shares
+        # this module's deterministic priority selector.
+        from .human_remediation_lifecycle import lifecycle_summary, load_lifecycle
+
+        human_remediation_lifecycle = lifecycle_summary(load_lifecycle())
 
     verdicts = qualification["grading"]["verdict_counts"]
     coverage = qualification["coverage"]
@@ -188,6 +196,7 @@ def build_dashboard(
             ),
         },
         "human_v2": _human_section(human_trend_report, human_checkpoint_history),
+        "human_remediation_lifecycle": human_remediation_lifecycle,
         "defects": {
             "cluster_count": int((clusters or {}).get("cluster_count", 0)),
             "actionable_product_cluster_count": int(
@@ -219,6 +228,7 @@ def render_markdown(view: dict[str, Any]) -> str:
     d = view["deterministic"]
     a = view["advisory"]
     human = view.get("human_v2", {"available": False})
+    lifecycle = view.get("human_remediation_lifecycle", {"record_count": 0})
     defects = view["defects"]
     regressions = view["regressions"]
     trends = view["trends"]
@@ -291,19 +301,13 @@ def render_markdown(view: dict[str, Any]) -> str:
             lines.append("- none")
 
         lines.extend(["", "### Service movement", ""])
-        lines.append(
-            "- Improved: " + (", ".join(human["improved_services"]) or "none")
-        )
-        lines.append(
-            "- Regressed: " + (", ".join(human["regressed_services"]) or "none")
-        )
+        lines.append("- Improved: " + (", ".join(human["improved_services"]) or "none"))
+        lines.append("- Regressed: " + (", ".join(human["regressed_services"]) or "none"))
 
         priority = human.get("next_priority")
         lines.extend(["", "### Next Human defect to fix", ""])
         if priority:
-            service_text = (
-                f" in {priority['service']}" if priority.get("service") else ""
-            )
+            service_text = f" in {priority['service']}" if priority.get("service") else ""
             lines.append(
                 f"- `{priority['failure_code']}` ({priority['recurrence']}){service_text}: {_pct(priority['current_rate'])} current rate, {priority['current_count']} occurrences."
             )
@@ -321,6 +325,43 @@ def render_markdown(view: dict[str, Any]) -> str:
                 "- Judge model calls: 0",
                 "- External calls: 0",
                 "- Zero judge tokens: true",
+            ]
+        )
+
+    if int(lifecycle.get("record_count", 0)) > 0:
+        counts = lifecycle.get("status_counts", {})
+        lines.extend(
+            [
+                "",
+                "## Human remediation lifecycle",
+                "",
+                f"- Tracked remediations: {lifecycle['record_count']}",
+                f"- Active: {lifecycle['active_count']}",
+                f"- Replay verified: {lifecycle['verified_count']}",
+                f"- Improved: {lifecycle['improved_count']}",
+                f"- Resolved: {lifecycle['resolved_count']}",
+                "- Current stage counts: " + ", ".join(
+                    f"{stage}={count}" for stage, count in counts.items() if count
+                ),
+                "",
+                "### Active Human remediations",
+                "",
+            ]
+        )
+        active = lifecycle.get("active", [])
+        if active:
+            for item in active:
+                service = f" / {item['service']}" if item.get("service") else ""
+                issue = f" / issue #{item['issue_number']}" if item.get("issue_number") else ""
+                lines.append(
+                    f"- `{item['failure_code']}`{service}: **{item['status']}**{issue}"
+                )
+        else:
+            lines.append("- none")
+        lines.extend(
+            [
+                "",
+                "A GitHub issue or merged fix is not treated as resolved. Resolution requires a later accepted Human checkpoint with zero occurrences of the targeted defect.",
             ]
         )
 
@@ -342,7 +383,7 @@ def render_markdown(view: dict[str, Any]) -> str:
             "",
             str(q["boundary"]),
             "",
-            "The dashboard is presentation-only. It does not create evidence, override deterministic grading, convert fixture-pipeline results into live ROBERTA proof, promote Human defects automatically, or authorize execution.",
+            "The dashboard is presentation-only. It does not create evidence, override deterministic grading, convert fixture-pipeline results into live ROBERTA proof, promote Human defects automatically, mark a merged fix resolved without replay proof, or authorize execution.",
             "",
         ]
     )
