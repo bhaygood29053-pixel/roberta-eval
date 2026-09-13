@@ -3,6 +3,7 @@
   "accepted_observed_at": "2026-09-13",
   "commit_sha": "becb264b8026b5cbbf99f0d12dea62463510c6ee",
   "empty_domains_allowed": [
+    "policy",
     "prompt"
   ],
   "execution_authorized": false,
@@ -20,14 +21,6 @@
       "path": "src/roberta/human_response_renderer.py"
     },
     {
-      "owner_domain": "policy",
-      "path": "src/roberta/recommendation_policy.py"
-    },
-    {
-      "owner_domain": "policy",
-      "path": "src/roberta/opinion_contract.py"
-    },
-    {
       "owner_domain": "service_adapter",
       "path": "src/roberta/bridge_http.py"
     },
@@ -42,6 +35,6 @@
   "read_only_source": true,
   "repository": "bhaygood29053-pixel/roberta-langgraph",
   "runtime_entrypoint": "roberta.human_response_renderer:render_human_response",
-  "source_pin_sha256": "dc76447716d5b31f2bdb920045c34812e0ba6693f7f592e9b5ac4aba2a563ae6",
+  "source_pin_sha256": "2f1215bc5f7b3acde012d495154c367cff7dcba73f27dddaa1b737a928019960",
   "source_pin_version": "roberta_human_root_cause_source_pin/v1"
 }
