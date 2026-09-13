@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "src/roberta_eval/human_root_cause_artifact_sandbox.py"
+      - "src/roberta_eval/human_root_cause_artifact_handoff.py"
       - "tests/test_human_root_cause_artifact_sandbox.py"
       - "config/human_root_cause_artifact_source.json"
       - "config/human_root_cause_artifact_sandbox_ledger.json"
@@ -69,13 +70,15 @@ jobs:
           assert summary["runner_outcome_authority"] is False
           PY
 
-      - name: Production isolation boundary
+      - name: Production isolation and authority boundary
         run: |
           python - <<'PY'
           from pathlib import Path
-          text = Path("src/roberta_eval/human_root_cause_artifact_sandbox.py").read_text()
-          assert "socket.socket = _BlockedSocket" in text
-          assert "production_runtime_touched" in text
-          assert "qualify_materialized_receipt_with_lab85" in text
-          assert "submit_materialized_receipt_to_lab85" in text
+          sandbox = Path("src/roberta_eval/human_root_cause_artifact_sandbox.py").read_text()
+          handoff = Path("src/roberta_eval/human_root_cause_artifact_handoff.py").read_text()
+          assert "socket.socket = _BlockedSocket" in sandbox
+          assert "production_runtime_touched" in sandbox
+          assert "execute_materialized_handoff" in handoff
+          assert "receipt_to_lab85_result_input(plan, manifest, receipt)" in handoff
+          assert "runner_outcome_authority" in handoff
           PY
