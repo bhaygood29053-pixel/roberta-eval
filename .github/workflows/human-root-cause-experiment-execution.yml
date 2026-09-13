@@ -1,0 +1,73 @@
+name: Human Root-Cause Controlled Experiment Execution Gate
+
+on:
+  pull_request:
+    paths:
+      - 'src/roberta_eval/human_root_cause_experiment_execution.py'
+      - 'tests/test_human_root_cause_experiment_execution.py'
+      - 'config/human_root_cause_experiment_execution_ledger.json'
+      - 'docs/HUMAN_ROOT_CAUSE_EXPERIMENT_EXECUTION.md'
+      - 'pyproject.toml'
+      - '.github/workflows/human-root-cause-experiment-execution.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-experiment-execution-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+
+      - name: Controlled experiment execution regressions
+        run: pytest -q tests/test_human_root_cause_experiment_execution.py
+
+      - name: Validate tracked empty execution ledger
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from roberta_eval.human_root_cause_experiment_execution import validate_execution_ledger
+
+          path = Path('config/human_root_cause_experiment_execution_ledger.json')
+          payload = json.loads(path.read_text())
+          validate_execution_ledger(payload)
+          assert payload['executions'] == []
+          assert payload['policy']['experiment_definition_frozen'] is True
+          assert payload['policy']['runner_outcome_authority'] is False
+          assert payload['policy']['lab85_qualification_authority'] is True
+          assert payload['policy']['production_code_mutation'] is False
+          assert payload['policy']['execution_authorized'] is False
+          PY
+
+      - name: Installed execution CLI smoke
+        run: roberta-eval-human-root-cause-execute summary
+
+      - name: LAB 85 authority boundary
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_root_cause_experiment_execution import empty_execution_ledger, execution_summary
+
+          summary = execution_summary(empty_execution_ledger())
+          assert summary['runner_outcome_authority'] is False
+          assert summary['lab85_qualification_authority'] is True
+          assert summary['deterministic_reproducibility_required'] is True
+          assert summary['production_code_mutation'] is False
+          assert summary['execution_authorized'] is False
+          PY
+
+      - name: Safety boundary
+        run: |
+          grep -q 'runner_outcome_authority=false' docs/HUMAN_ROOT_CAUSE_EXPERIMENT_EXECUTION.md
+          grep -q 'lab85_qualification_authority=true' docs/HUMAN_ROOT_CAUSE_EXPERIMENT_EXECUTION.md
+          grep -q 'execution_authorized=false' docs/HUMAN_ROOT_CAUSE_EXPERIMENT_EXECUTION.md

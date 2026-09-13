@@ -1,0 +1,18 @@
+{
+  "executions": [],
+  "ledger_version": "roberta_human_root_cause_execution_ledger/v1",
+  "policy": {
+    "artifact_digest_verification_required": true,
+    "bounded_evaluation_execution": true,
+    "deterministic_reproducibility_required": true,
+    "experiment_definition_frozen": true,
+    "external_calls_required": false,
+    "github_issue_mutation": false,
+    "lab85_qualification_authority": true,
+    "matched_ordered_corpus_required": true,
+    "one_execution_receipt_per_plan": true,
+    "production_code_mutation": false,
+    "runner_outcome_authority": false,
+    "execution_authorized": false
+  }
+}
