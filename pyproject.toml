@@ -17,6 +17,7 @@ dev = ["pytest>=8"]
 roberta-eval = "roberta_eval.cli:main"
 roberta-eval-human-trends = "roberta_eval.human_trends:main"
 roberta-eval-human-checkpoint = "roberta_eval.human_checkpoint_history:main"
+roberta-eval-human-promote = "roberta_eval.human_remediation_promotion:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

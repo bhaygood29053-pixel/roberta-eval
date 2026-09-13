@@ -1,0 +1,109 @@
+name: Human Remediation Promotion Gate
+
+on:
+  push:
+    branches: ["main", "lab-*"]
+  pull_request:
+
+jobs:
+  promotion-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+
+      - name: Promotion regressions
+        run: pytest tests/test_human_remediation_promotion.py
+
+      - name: Validate tracked empty ledger
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_remediation_promotion import (
+              load_promotion_ledger,
+              promotion_ledger_summary,
+          )
+          summary = promotion_ledger_summary(load_promotion_ledger())
+          assert summary["promotion_count"] == 0
+          assert summary["approval_required"] is True
+          assert summary["duplicate_issue_prevention"] is True
+          assert summary["production_code_mutation"] is False
+          assert summary["execution_authorized"] is False
+          PY
+
+      - name: Build review-only Human proposal fixture
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          proposal = {
+              "proposal_version": "roberta_github_defect_proposal/v1",
+              "proposal_kind": "human_language_remediation",
+              "proposal_fingerprint": "a" * 64,
+              "target_repository": "bhaygood29053-pixel/roberta-langgraph",
+              "routing_status": "routed",
+              "title": "[ROBERTA Lab][Human v2] pre_trade: technical_language_leak (RECURRENT)",
+              "body": "CI Human remediation proposal",
+              "labels": ["roberta-lab", "defect", "human-v2", "language-quality"],
+              "confirmed": True,
+              "confirmation_basis": "accepted_human_checkpoint_or_explicit_trend",
+              "human_priority": {
+                  "failure_code": "technical_language_leak",
+                  "recurrence": "RECURRENT",
+                  "current_rate": 0.25,
+                  "current_count": 5,
+                  "service": "pre_trade",
+              },
+              "previous_snapshot_id": "ci-human-001",
+              "current_snapshot_id": "ci-human-002",
+              "source_mode": "accepted_checkpoint_history",
+              "reviewable_proposal_only": True,
+              "issue_created": False,
+              "production_mutation": False,
+              "ai_judge_used": False,
+              "judge_model_calls": 0,
+              "external_calls": 0,
+              "zero_judge_tokens": True,
+              "execution_authorized": False,
+          }
+          Path("/tmp/human-proposals.jsonl").write_text(
+              json.dumps(proposal, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Explicit approval dry run
+        run: |
+          cp config/human_remediation_promotion_ledger.json /tmp/human-promotion-ledger.json
+          roberta-eval-human-promote \
+            --proposals /tmp/human-proposals.jsonl \
+            --reviewer ci-reviewer \
+            --approve \
+            --ledger /tmp/human-promotion-ledger.json \
+            --output /tmp/human-promotion-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from roberta_eval.human_remediation_promotion import (
+              load_promotion_ledger,
+              promotion_ledger_summary,
+          )
+
+          result = json.loads(Path("/tmp/human-promotion-result.json").read_text(encoding="utf-8"))
+          assert result["status"] == "APPROVED_DRY_RUN"
+          assert result["issue_created"] is False
+          assert result["production_code_mutation"] is False
+          assert result["execution_authorized"] is False
+          summary = promotion_ledger_summary(
+              load_promotion_ledger(Path("/tmp/human-promotion-ledger.json"))
+          )
+          assert summary["promotion_count"] == 0
+          PY
