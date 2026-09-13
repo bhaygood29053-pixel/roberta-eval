@@ -436,6 +436,7 @@ def render_markdown(view: dict[str, Any]) -> str:
         lines.extend(
             [
                 "",
+                "The closure gate is fail-closed: only lifecycle status RESOLVED with a promoted issue identity is closure-ready. IMPROVED, REPLAY_VERIFIED, and FIX_MERGED are never sufficient for closure.",
                 "Terminal CLOSED remediations are removed from the active action queue. Reconciliation is read-only: a later reopened GitHub issue is reported as an inconsistency and does not erase the accepted resolution or closure evidence.",
             ]
         )
