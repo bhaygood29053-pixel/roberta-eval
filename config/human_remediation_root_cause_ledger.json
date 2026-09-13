@@ -1,0 +1,15 @@
+{
+  "dispositions": [],
+  "investigations": [],
+  "ledger_version": "roberta_human_remediation_root_cause_ledger/v1",
+  "policy": {
+    "automatic_issue_creation": false,
+    "execution_authorized": false,
+    "explicit_owner_disposition_required": true,
+    "generation_2_plus_investigation_required": true,
+    "production_code_mutation": false,
+    "replay_success_alone_sufficient": false,
+    "root_cause_claims_require_evidence": true,
+    "symptom_fix_alone_sufficient": false
+  }
+}
