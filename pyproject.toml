@@ -26,6 +26,7 @@ roberta-eval-human-reopen = "roberta_eval.human_remediation_reopen:main"
 roberta-eval-human-reopen-cycle = "roberta_eval.human_remediation_reopen_cycle:main"
 roberta-eval-human-lineage = "roberta_eval.human_remediation_lineage:main"
 roberta-eval-human-root-cause = "roberta_eval.human_remediation_root_cause:main"
+roberta-eval-human-root-cause-acquire = "roberta_eval.human_root_cause_evidence_acquisition:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
