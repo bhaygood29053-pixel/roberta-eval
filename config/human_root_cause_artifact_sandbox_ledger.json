@@ -1,0 +1,16 @@
+{
+  "ledger_version": "roberta_human_root_cause_artifact_sandbox_ledger/v1",
+  "materializations": [],
+  "policy": {
+    "accepted_control_source_required": true,
+    "execution_authorized": false,
+    "github_issue_mutation": false,
+    "lab85_qualification_authority": true,
+    "one_materialization_per_plan": true,
+    "production_code_mutation": false,
+    "production_faithful_offline_sandbox": true,
+    "production_runtime_touched": false,
+    "runner_outcome_authority": false,
+    "target_domain_only_overlay": true
+  }
+}
