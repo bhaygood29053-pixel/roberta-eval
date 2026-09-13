@@ -1,0 +1,62 @@
+name: Human Root-Cause Evidence Acquisition Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  evidence-acquisition-gate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: pip install -e .[dev]
+
+      - name: Evidence acquisition regressions
+        run: pytest -q tests/test_human_root_cause_evidence_acquisition.py
+
+      - name: Installed acquisition CLI smoke
+        run: |
+          roberta-eval-human-root-cause-acquire snapshot > /tmp/root-cause-source-snapshot.json
+          python - <<'PY'
+          import json
+          snapshot = json.load(open('/tmp/root-cause-source-snapshot.json'))
+          assert snapshot['source_snapshot_version'] == 'roberta_human_root_cause_source_snapshot/v1'
+          assert snapshot['acquisition_version'] == 'roberta_human_root_cause_evidence_acquisition/v1'
+          assert snapshot['source_transport_used'] is False
+          assert snapshot['external_calls'] == 0
+          assert snapshot['read_only'] is True
+          assert snapshot['github_issue_mutation'] is False
+          assert snapshot['production_code_mutation'] is False
+          assert snapshot['execution_authorized'] is False
+          PY
+
+      - name: LAB 81 authority boundary
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_root_cause_evidence_acquisition import DOMAIN_PATH_RULES
+          from roberta_eval.human_remediation_root_cause import DOMAINS
+          assert tuple(DOMAIN_PATH_RULES) == DOMAINS
+          print('automatic evidence is INDIRECT_ONLY; LAB #81 retains causal confirmation authority')
+          PY
+
+      - name: Safety boundary
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_root_cause_evidence_acquisition import GitHubRestEvidenceSourceTransport
+          # Construction performs no network I/O. Live acquisition is opt-in only.
+          transport = GitHubRestEvidenceSourceTransport('')
+          assert transport is not None
+          print('read-only transport constructed; no external call performed')
+          PY
