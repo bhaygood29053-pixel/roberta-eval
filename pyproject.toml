@@ -20,11 +20,12 @@ roberta-eval-human-checkpoint = "roberta_eval.human_checkpoint_history:main"
 roberta-eval-human-promote = "roberta_eval.human_remediation_promotion:main"
 roberta-eval-human-lifecycle = "roberta_eval.human_remediation_lifecycle:main"
 roberta-eval-human-actions = "roberta_eval.human_remediation_actions:main"
-roberta-eval-human-close = "roberta_eval.human_remediation_closure:main"
+roberta-eval-human-close = "roberta_eval.human_remediation_closure_guard:main"
 roberta-eval-human-terminal = "roberta_eval.human_remediation_terminal:main"
 roberta-eval-human-reopen = "roberta_eval.human_remediation_reopen:main"
 roberta-eval-human-reopen-cycle = "roberta_eval.human_remediation_reopen_cycle:main"
 roberta-eval-human-lineage = "roberta_eval.human_remediation_lineage:main"
+roberta-eval-human-root-cause = "roberta_eval.human_remediation_root_cause:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

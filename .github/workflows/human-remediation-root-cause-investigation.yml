@@ -1,0 +1,78 @@
+name: Human Remediation Root-Cause Investigation Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  root-cause-investigation-gate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: pip install -e .[dev]
+
+      - name: Root-cause investigation regressions
+        run: |
+          pytest -q \
+            tests/test_human_remediation_root_cause.py \
+            tests/test_human_remediation_root_cause_closure_guard.py
+
+      - name: Validate tracked empty root-cause ledger
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_remediation_root_cause import (
+              load_root_cause_ledger,
+              root_cause_summary,
+          )
+          ledger = load_root_cause_ledger()
+          summary = root_cause_summary(ledger)
+          assert summary['investigation_count'] == 0
+          assert summary['addressed_count'] == 0
+          assert summary['generation_2_plus_investigation_required'] is True
+          assert summary['root_cause_claims_require_evidence'] is True
+          assert summary['symptom_fix_alone_sufficient'] is False
+          assert summary['replay_success_alone_sufficient'] is False
+          assert summary['production_code_mutation'] is False
+          assert summary['execution_authorized'] is False
+          PY
+
+      - name: Installed CLIs smoke
+        run: |
+          roberta-eval-human-root-cause summary > /tmp/root-cause-summary.json
+          roberta-eval-human-close --help > /tmp/human-close-help.txt
+          python - <<'PY'
+          import json
+          summary = json.load(open('/tmp/root-cause-summary.json'))
+          assert summary['ledger_version'] == 'roberta_human_remediation_root_cause_ledger/v1'
+          help_text = open('/tmp/human-close-help.txt').read()
+          assert '--root-cause-ledger' in help_text
+          assert '--reopen-cycle-ledger' in help_text
+          PY
+
+      - name: Safety boundary
+        run: |
+          python - <<'PY'
+          from roberta_eval.human_remediation_root_cause import empty_root_cause_ledger
+          ledger = empty_root_cause_ledger()
+          policy = ledger['policy']
+          assert policy['root_cause_claims_require_evidence'] is True
+          assert policy['generation_2_plus_investigation_required'] is True
+          assert policy['explicit_owner_disposition_required'] is True
+          assert policy['symptom_fix_alone_sufficient'] is False
+          assert policy['replay_success_alone_sufficient'] is False
+          assert policy['automatic_issue_creation'] is False
+          assert policy['production_code_mutation'] is False
+          assert policy['execution_authorized'] is False
+          PY
